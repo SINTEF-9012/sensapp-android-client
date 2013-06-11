@@ -1,0 +1,47 @@
+~~
+~~ Copyright (C) 2012 SINTEF <fabien@fleurey.com>
+~~
+~~ Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~     http://www.gnu.org/licenses/lgpl-3.0.txt
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~
+
+ -----
+ SensApp Android
+ -----
+ Fabien Fleurey
+ -----
+
+<<SensApp Android application>>
+
+    The SensApp android application provides a gateway between any application on the device and remote {{{http://sensapp.modelbased.net}SensApp}} web instances. To know more about SensApp go to it's GitHub {{{https://github.com/SINTEF-9012/sensapp}repository}}.
+
+    This application provides a database shared with client applications on the android device. While the client applications can easily insert sensors and measures in the database, SensApp android maintains and upload data to remote SensApp web instances.
+
+* Download
+
+    * {{{https://play.google.com/store/apps/details?id=org.sensapp.android.sensappdroid}Latest release build}}: available on the Google Play.
+    
+    * {{{http://build.thingml.org/job/Build%20SensApp%20Android/lastSuccessfulBuild/org.sensapp.android$sensappdroid-main}Latest snapshot build}}: intall the <sensappdroid-main-X.X.X-SNAPSHOT-aligned.apk> file.
+
+* Bugs and Feature requests
+
+    Please see and use the issue tracker at: {{https://github.com/SINTEF-9012/sensapp-android/issues}}
+
+* Client application
+
+    The complete source and documentation of a simple client application is available at {{https://github.com/SINTEF-9012/sensapp-android/tree/master/sensappdroid-clientsamples/batlog}}.
+
+* Screenshot
+
+[https://raw.github.com/SINTEF-9012/sensapp-android/master/extra/screenshots/sensors.png] SensApp android sensors
+    
+[https://raw.github.com/SINTEF-9012/sensapp-android/master/extra/screenshots/pref_upload.png] SensApp android upload

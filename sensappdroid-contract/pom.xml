@@ -1,0 +1,54 @@
+<project 
+    xmlns="http://maven.apache.org/POM/4.0.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>sensappdroid-contract</artifactId>
+  <packaging>jar</packaging>
+  <version>1.1-SNAPSHOT</version>
+  <name>SensApp Android :: Contract</name>
+  
+  <repositories>
+    <repository>
+      <id>thingml-release</id>
+      <name>thingml-release</name>
+      <url>http://maven.thingml.org/thingml-release</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+  </repositories>
+
+  <ciManagement>
+    <system>jenkins</system>
+    <url>http://build.thingml.org/job/Build%20SensApp%20Android/org.sensapp.android$sensappdroid-contract</url>
+  </ciManagement>
+
+  <properties>
+    <headerdir>${project.parent.basedir}</headerdir>
+    <findbugs-exclude.location>${project.parent.basedir}/reporting/findbugs-exclude.xml</findbugs-exclude.location>
+    <maven-checkstyle-plugin.configLocation>${project.parent.basedir}/reporting/checkstyle.xml</maven-checkstyle-plugin.configLocation>
+    <maven-pmd-plugin.configLocation>${project.parent.basedir}/reporting/pmd.xml</maven-pmd-plugin.configLocation>
+  </properties>
+  
+  <parent>
+    <groupId>org.sensapp.android</groupId>
+    <artifactId>sensappdroid</artifactId>
+    <version>1.1-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>com.github.github</groupId>
+	<artifactId>site-maven-plugin</artifactId>
+	<configuration>
+	  <message>[Maven] Updating site for ${project.version}</message>
+	  <path>${project.artifactId}</path>
+	  <merge>true</merge>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
