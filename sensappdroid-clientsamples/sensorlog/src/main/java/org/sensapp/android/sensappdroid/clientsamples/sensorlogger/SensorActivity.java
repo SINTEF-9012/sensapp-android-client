@@ -18,14 +18,14 @@ package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.preference.PreferenceManager;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ImageView;
 import org.sensapp.android.sensappdroid.api.SensAppHelper;
 import android.app.Activity;
 import android.os.Bundle;
@@ -39,85 +39,33 @@ public class SensorActivity extends Activity{
     protected static final String SERVICE_RUNNING = "pref_service_is_running";
     private static final String TAG = SensorActivity.class.getSimpleName();
 
-    private Button buttonService;
-    private TextView tvStatus;
-
-    final static int GREEN=0xFF4EFD4E;
-    final static int RED=0xFFFF5E4C;
+    final static int GREY=0xFFCCDDFF;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        buttonService = (Button) findViewById(R.id.b_status);
-        tvStatus = (TextView) findViewById(R.id.tv_status);
+        TextView title = (TextView)findViewById(R.id.app_title);
+        title.setText(R.string.app_title);
 
         SensorLoggerService.initSensorArray();
+
+        final LinearLayout l = (LinearLayout) findViewById(R.id.general_view);
 
         SensorManager mManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         for(Sensor s: mManager.getSensorList(Sensor.TYPE_ALL)){
             final AndroidSensor as = new AndroidSensor(s, "Android_Tab");
+            as.setRefreshRate(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getInt(as.getName(), AndroidSensor.DEFAULT_RATE));
             SensorLoggerService.addSensor(as);
             final Button b = new Button(this);
-            b.setText("Start logging " + as.getName());
-            b.setBackgroundColor(GREEN);
-            final LinearLayout l = (LinearLayout) findViewById(R.id.general_view);
+            final ImageView image = new ImageView(this);
+            LinearLayout line = new LinearLayout(this);
+            LinearLayout forImage = new LinearLayout(this);
 
-            b.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(as.isListened()){
-                        //stop listening and change button text
-                        as.setListened(false);
-                        b.setText("Start logging " + as.getName());
-                        b.setBackgroundColor(GREEN);
-                        //l.refreshDrawableState();
-                    }
-                    else{
-                        //begin listening and change button text
-                        as.setListened(true);
-                        b.setText("Stop logging " + as.getName());
-                        b.setBackgroundColor(RED);
-                        //l.refreshDrawableState();
-                    }
-                }
-            });
-
-            l.addView(b);
+            initButton(b, as, image);
+            initImage(image, l);
+            initMainAppView(l, line, forImage, image, b);
         }
-
-
-
-        updateLabels();
-
-        buttonService.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Get the shared preferences.
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
-                    // If service is not running.
-
-                    // Check if SensApp is installed.
-                    if (!SensAppHelper.isSensAppInstalled(getApplicationContext())) {
-                        // If not suggest to install and return.
-                        SensAppHelper.getInstallationDialog(SensorActivity.this).show();
-                        return;
-                    }
-                    // Update the preference. Service is now running.
-                    preferences.edit().putBoolean(SERVICE_RUNNING, true).commit();
-                    // Schedule a repeating alarm to start the service, which stops itself.
-                    AlarmHelper.setAlarm(getApplicationContext());
-                } else {
-                    // Service is running so it must stop.
-                    // Update the preference.
-                    preferences.edit().putBoolean(SERVICE_RUNNING, false).commit();
-                    // Request for disable, cancel the alarm.
-                    AlarmHelper.cancelAlarm(getApplicationContext());
-                }
-                // Update button and text view.
-                updateLabels();
-            }
-        });
     }
 
     @Override
@@ -136,14 +84,73 @@ public class SensorActivity extends Activity{
         return false;
     }
 
-    private void updateLabels() {
-        if (PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean(SERVICE_RUNNING, false)) {
-            buttonService.setText(R.string.button_service_stop);
-            tvStatus.setText(R.string.tv_status_running);
-        } else {
-            buttonService.setText(R.string.button_service_start);
-            tvStatus.setText(R.string.tv_status_stoped);
-        }
+    private void initMainAppView(LinearLayout l, LinearLayout line, LinearLayout img, ImageView image, Button b){
+        img.setPadding(65, 10, 55, 0);
+        img.addView(image);
+        line.setPadding(0,11,50,0);
+        line.addView(img);
+        line.addView(b);
+        l.addView(line);
+        LinearLayout separator = new LinearLayout(this);
+        separator.setMinimumHeight(1);
+        separator.setMinimumWidth(l.getWidth());
+        separator.setBackgroundColor(GREY);
+        l.addView(separator);
+    }
+
+    private void initButton(final Button b, final AndroidSensor as, final ImageView image){
+        b.setText("Start logging " + as.getName());
+        b.setBackgroundColor(Color.BLACK);
+        b.setMinimumHeight(50);
+        b.setTextColor(Color.WHITE);
+        b.setGravity(Gravity.LEFT);
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
+                    // If service is not running.
+
+                    // Check if SensApp is installed.
+                    if (!SensAppHelper.isSensAppInstalled(getApplicationContext())) {
+                        // If not suggest to install and return.
+                        SensAppHelper.getInstallationDialog(SensorActivity.this).show();
+                        return;
+                    }
+                }
+
+                if (as.isListened()) {
+                    as.setListened(false);
+                    b.setText("Start logging " + as.getName());
+                    image.setImageResource(R.drawable.button_round_red);
+
+                    if(SensorLoggerService.noSensorListened() && preferences.getBoolean(SERVICE_RUNNING, false)){
+                        // Service is running so it must stop.
+                        // Update the preference.
+                        preferences.edit().putBoolean(SERVICE_RUNNING, false).commit();
+                        // Request for disable, cancel the alarm.
+                        AlarmHelper.cancelAlarm(getApplicationContext());
+                    }
+                } else {
+                    as.setListened(true);
+                    b.setText("Stop logging " + as.getName());
+                    image.setImageResource(R.drawable.button_round_green);
+
+                    if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
+                        // Update the preference. Service is now running.
+                        preferences.edit().putBoolean(SERVICE_RUNNING, true).commit();
+                        // Schedule a repeating alarm to start the service, which stops itself.
+                        AlarmHelper.setAlarm(getApplicationContext());
+                    }
+                }
+            }
+        });
+    }
+
+    private void initImage(ImageView img, LinearLayout l){
+        img.setImageResource(R.drawable.button_round_red);
+        img.setMinimumWidth(l.getWidth());
+        img.setScaleType(ImageView.ScaleType.FIT_START);
     }
 }
 

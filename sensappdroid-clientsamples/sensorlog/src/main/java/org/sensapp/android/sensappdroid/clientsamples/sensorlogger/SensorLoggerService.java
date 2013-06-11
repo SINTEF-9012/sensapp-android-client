@@ -185,7 +185,7 @@ public class SensorLoggerService extends Service implements SensorEventListener{
         return sensors;
     }
 
-    private boolean noSensorListened(){
+    static public boolean noSensorListened(){
         for(AndroidSensor s : sensors){
             if(s.isListened())
                 return false;

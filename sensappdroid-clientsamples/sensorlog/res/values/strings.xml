@@ -19,6 +19,7 @@
 <resources>
 
     <string name="app_name">Sensor Activity</string>
+    <string name="app_title">Click on a sensor to log/unlog it</string>
     <string name="title_activity_main">Sensor Activity</string>
     <string name="title_activity_preferences">Settings</string>
 
