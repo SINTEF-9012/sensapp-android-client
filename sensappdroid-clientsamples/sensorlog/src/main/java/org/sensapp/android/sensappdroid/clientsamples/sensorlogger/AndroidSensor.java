@@ -34,11 +34,11 @@ import org.sensapp.android.sensappdroid.api.SensAppUnit;
  * At the moment there are only sensors with 1 or 3 data, so 2 data sensor or not implemented.
  */
 
-public class AndroidSensor {
+public class AndroidSensor extends AbstractSensor{
 
     private static final String TAG = AndroidSensor.class.getSimpleName();
 
-    final static int DEFAULT_RATE = 500;            //Default rate of the sensor measures in milliseconds
+    /*final static int DEFAULT_RATE = 500;            //Default rate of the sensor measures in milliseconds
     private float[] data;                           //Array to stock data
     private Sensor mSensor;                         //The sensor
     private String mComposite;                      //The group where the sensor is
@@ -47,69 +47,13 @@ public class AndroidSensor {
     private boolean freshMeasure = false;           //If the sensor has new data to post
     private long lastMeasure=0;                     //The time of the last measure
     private int refreshRate;                        //The current rate of the sensor measures in milliseconds
-    private boolean listened = false;               //If the sensor is listened or not
+    private boolean listened = false;               //If the sensor is listened or not   */
 
     AndroidSensor(Sensor s, String composite) {
         mSensor = s;
         setEntryLevel();
         initData();
         mComposite = composite;
-    }
-
-    /**
-    * Register sensor and his group into SensApp API
-    * If the group is not present, add it.
-    * Then add the different sensors (x, y, z)
-    * Then make the link between sensors and group
-    */
-    public Uri registerInSensApp(Context context, int drawable){
-        Uri u = null;
-        refreshRate = PreferenceManager.getDefaultSharedPreferences(context).getInt(getName(), DEFAULT_RATE);
-        if(!SensAppHelper.isCompositeRegistered(context, mComposite))
-            SensAppHelper.registerComposite(context, mComposite, "List some sensors of the tablet");
-        if(isOneDataSensor()){
-            u = SensAppHelper.registerNumericalSensor(context, getName(), getType(), getUnit(), drawable);
-            if(!SensAppHelper.isComposeRegistered(context, mComposite, getName()))
-                SensAppHelper.registerCompose(context, getName()+"1", mComposite, getName());
-        }
-        else if(isThreeDataSensor()){
-            u = SensAppHelper.registerNumericalSensor(context, getName()+"X", getType(), getUnit(), drawable);
-            SensAppHelper.registerNumericalSensor(context, getName()+"Y", getType(), getUnit(), drawable);
-            SensAppHelper.registerNumericalSensor(context, getName()+"Z", getType(), getUnit(), drawable);
-            if(!SensAppHelper.isComposeRegistered(context, mComposite, getName()+"X")){
-                SensAppHelper.registerCompose(context, getName()+"1", mComposite, getName()+"X");
-                SensAppHelper.registerCompose(context, getName()+"2", mComposite, getName()+"Y");
-                SensAppHelper.registerCompose(context, getName()+"3", mComposite, getName()+"Z");
-            }
-        }
-        return u;
-    }
-
-    /**
-     * Insert the measures of the sensor into SensApp API by using SensAppHelper.
-     * @param context : the context of the application
-     */
-    public void insertMeasure(Context context) {
-        try {
-            if(isFreshMeasure()){
-                Uri measureUri;
-                if(isOneDataSensor()){
-                    measureUri = SensAppHelper.insertMeasure(context, getName(), data[0]);
-                    Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
-                }
-                else if(isThreeDataSensor()){
-                    measureUri = SensAppHelper.insertMeasure(context, getName()+"X", data[0]);
-                    Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
-                    measureUri = SensAppHelper.insertMeasure(context, getName()+"Y", data[1]);
-                    Log.i(TAG, "New measure (" + data[1] + ") available at " + measureUri);
-                    measureUri = SensAppHelper.insertMeasure(context, getName()+"Z", data[2]);
-                    Log.i(TAG, "New measure (" + data[2] + ") available at " + measureUri);
-                }
-            }
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     public boolean isThreeDataSensor(){
@@ -142,20 +86,20 @@ public class AndroidSensor {
             data = new float[3];
     }
 
-    public void setData(float x){
+    public void setData(Context context, float x){
         if(!isOneDataSensor())
             return;
         data[0]=x*entryLevel;
     }
 
-    public void setData(float x, float y, float z){
+    public void setData(Context context, float x, float y, float z){
         if(!isThreeDataSensor())
             return;
         data[0]=x*entryLevel;
         data[1]=y*entryLevel;
         data[2]=z*entryLevel;
     }
-
+    /*
     public void setListened(boolean set){
         listened = set;
     }
@@ -186,7 +130,7 @@ public class AndroidSensor {
 
     public boolean isMeasured(){
         return measured;
-    }
+    }         */
 
     /**
      * Set up the entry level for each sensor.
@@ -217,14 +161,14 @@ public class AndroidSensor {
     public Sensor getSensor(){
         return mSensor;
     }
-
+       /*
     public int getMeasureTime(){
         return refreshRate;
     }
 
     public void setRefreshRate(int rate){
         refreshRate = rate;
-    }
+    }     */
 
     public String getType() {
         String strType;

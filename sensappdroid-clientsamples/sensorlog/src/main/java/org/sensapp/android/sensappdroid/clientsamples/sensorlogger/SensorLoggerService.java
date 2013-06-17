@@ -41,7 +41,7 @@ public class SensorLoggerService extends Service implements SensorEventListener{
 	private static final String TAG = SensorLoggerService.class.getSimpleName();
 
     SensorManager sensorManager;
-    static List<AndroidSensor> sensors;
+    static List<AbstractSensor> sensors;
 
 	@Override
 	public void onCreate() {
@@ -64,7 +64,7 @@ public class SensorLoggerService extends Service implements SensorEventListener{
         if(noSensorListened())
             stopSelf();
 
-        for(AndroidSensor s: sensors){
+        for(AbstractSensor s: sensors){
             try{
                 if(s.isListened())
                     sensorManager.registerListener(this, s.getSensor(), SensorManager.SENSOR_DELAY_UI);
@@ -88,27 +88,38 @@ public class SensorLoggerService extends Service implements SensorEventListener{
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        AndroidSensor s = getSensorByType(sensorEvent.sensor.getType());
+        AbstractSensor s = getSensorByType(sensorEvent.sensor.getType());
         if(s != null){
             if(s.isThreeDataSensor())
-                s.setData(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
+                s.setData(this, sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
             else
-                s.setData(sensorEvent.values[0]);
+                s.setData(this, sensorEvent.values[0]);
+
+            if(s.getLastMeasure() == 0)
+                s.setLastMeasure();
+            for(AbstractSensor as : sensors){
+                if(as.getClass() != AndroidSensor.class && (System.currentTimeMillis() - as.getLastMeasure() > as.getMeasureTime())) {
+                    as.setData(this);
+                    as.setMeasured();            //at least one measure
+                    as.setFreshMeasure(true);    //a new measure has been made
+                    insertMeasures();           //put it into local database
+                    as.setLastMeasure();         //refresh time of the last measure
+                    as.setFreshMeasure(false);   //no more last measure
+                }
+            }
 
             if((s.getLastMeasure() != 0) && (System.currentTimeMillis() - s.getLastMeasure() > s.getMeasureTime())){
-                s.setMeasured();            //at least one measure
-                s.setFreshMeasure(true);    //a new measure has been made
-                insertMeasures();           //put it into local database
-                s.setLastMeasure();         //refresh time of the last measure
-                s.setFreshMeasure(false);   //no more last measure
+                s.setMeasured();
+                s.setFreshMeasure(true);
+                insertMeasures();
+                s.setLastMeasure();
+                s.setFreshMeasure(false);
                 if(allSensorsMeasured()) {
                     unsetSensorListening();
                 }
                 stopSelf();
             }
         }
-        if(s.getLastMeasure() == 0)
-            s.setLastMeasure();
     }
 
     private void unsetSensorListening(){
@@ -119,7 +130,7 @@ public class SensorLoggerService extends Service implements SensorEventListener{
 
         StringBuffer sensorDesc = new StringBuffer();
         List<String> data = new ArrayList<String>();
-        for (AndroidSensor AS : sensors) {
+        for (AbstractSensor AS : sensors) {
             sensorDesc.append("New sensor detected : \r\n");
             sensorDesc.append("\tName: " + AS.getSensor().getName() + "\r\n");
             sensorDesc.append("\tType: " + AS.getType() + "\r\n\r\n");
@@ -132,7 +143,7 @@ public class SensorLoggerService extends Service implements SensorEventListener{
     }
 
 	private void insertMeasures() {
-		for(AndroidSensor s: sensors){
+		for(AbstractSensor s: sensors){
             s.insertMeasure(this);
         }
 	}
@@ -144,49 +155,49 @@ public class SensorLoggerService extends Service implements SensorEventListener{
 
     private String listData(){
         StringBuffer data = new StringBuffer();
-        for(AndroidSensor s : sensors){
+        for(AbstractSensor s : sensors){
             data.append(s.getData());
         }
         return data.toString();
     }
 
-    private AndroidSensor getSensorByType(int type){
-        for(AndroidSensor s : sensors)
+    private AbstractSensor getSensorByType(int type){
+        for(AbstractSensor s : sensors)
             if(s.getSensor().getType() == type)
                 return s;
         return null;
     }
 
-    static public AndroidSensor getSensorByName(String name){
-        for(AndroidSensor s: sensors){
+    static public AbstractSensor getSensorByName(String name){
+        for(AbstractSensor s: sensors){
             if(s.getName().equals(name))
                 return s;
         }
         return null;
     }
 
-    static public void addSensor(AndroidSensor as){
+    static public void addSensor(AbstractSensor as){
         sensors.add(as);
     }
 
     static public void initSensorArray(){
-        sensors = new ArrayList<AndroidSensor>();
+        sensors = new ArrayList<AbstractSensor>();
     }
 
     private boolean allSensorsMeasured(){
-        for(AndroidSensor s: sensors){
+        for(AbstractSensor s: sensors){
             if(!s.isMeasured() && s.isListened())
                 return false;
         }
         return true;
     }
 
-    static public List<AndroidSensor> getSensors(){
+    static public List<AbstractSensor> getSensors(){
         return sensors;
     }
 
     static public boolean noSensorListened(){
-        for(AndroidSensor s : sensors){
+        for(AbstractSensor s : sensors){
             if(s.isListened())
                 return false;
         }

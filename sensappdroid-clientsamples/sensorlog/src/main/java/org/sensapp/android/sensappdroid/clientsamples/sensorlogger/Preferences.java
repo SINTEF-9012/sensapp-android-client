@@ -19,6 +19,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.*;
 import android.preference.Preference.OnPreferenceChangeListener;
+import com.sun.xml.internal.ws.api.server.AbstractServerAsyncTransport;
+
 import java.util.List;
 
 /**
@@ -31,10 +33,10 @@ public class Preferences extends PreferenceActivity {
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.xml.preferences);
-            List<AndroidSensor> sensors = SensorLoggerService.getSensors();
+            List<AbstractSensor> sensors = SensorLoggerService.getSensors();
 
             //Set the sensors into 'preferences'
-            for(AndroidSensor s: sensors){
+            for(AbstractSensor s: sensors){
                 EditTextPreference sNew = new EditTextPreference(getActivity());
                 sNew.setTitle(s.getName());
                 sNew.setDialogTitle("Enter the refresh rate you wish for this sensor.");
@@ -49,7 +51,7 @@ public class Preferences extends PreferenceActivity {
                         if (((String) newValue).isEmpty()) {
                             return false;
                         }
-                        AndroidSensor toChange = SensorLoggerService.getSensorByName((String)preference.getTitle());
+                        AbstractSensor toChange = SensorLoggerService.getSensorByName((String)preference.getTitle());
                         toChange.setRefreshRate(Integer.parseInt((String) newValue));
                         SharedPreferences.Editor editor;
                         editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
