@@ -40,6 +40,7 @@ public class SensorActivity extends Activity{
     private static final String TAG = SensorActivity.class.getSimpleName();
 
     final static int GREY=0xFFCCDDFF;
+    final static String compositeName = "Android_Tab";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,38 +52,29 @@ public class SensorActivity extends Activity{
         SensorLoggerService.initSensorArray();
 
         final LinearLayout l = (LinearLayout) findViewById(R.id.general_view);
-
+        //Add all the Android sensors
         SensorManager mManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         for(Sensor s: mManager.getSensorList(Sensor.TYPE_ALL)){
-            addAndroidSensor(l, s);
+            AndroidSensor as = new AndroidSensor(s, compositeName);
+            addAbstractSensor(as, l);
         }
-        addBatterySensor(l);
+        //Add the battery
+        BatterySensor bs = new BatterySensor(compositeName);
+        addAbstractSensor(bs, l);
+        //Add the Free Memory percentage
+        FreeMemorySensor fms = new FreeMemorySensor(compositeName);
+        addAbstractSensor(fms, l);
     }
 
-    private void addAndroidSensor(LinearLayout l, Sensor s){
-        AndroidSensor as = new AndroidSensor(s, "Android_Tab");
-        as.setRefreshRate(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getInt(as.getName(), AndroidSensor.DEFAULT_RATE));
+    private void addAbstractSensor(AbstractSensor as, LinearLayout l){
+        as.setRefreshRate(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getInt(as.getName(), as.getDefaultRate()));
         SensorLoggerService.addSensor(as);
-        Button b = new Button(this);
-        ImageView image = new ImageView(this);
-        LinearLayout line = new LinearLayout(this);
-        LinearLayout forImage = new LinearLayout(this);
-
-        initButton(b, as, image);
-        initImage(image, l);
-        initMainAppView(l, line, forImage, image, b);
-    }
-
-    private void addBatterySensor(LinearLayout l){
-        BatterySensor bs = new BatterySensor("Android_Tab");
-        bs.setRefreshRate(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getInt(bs.getName(), BatterySensor.DEFAULT_RATE));
-        SensorLoggerService.addSensor(bs);
         final Button b = new Button(this);
         final ImageView image = new ImageView(this);
         LinearLayout line = new LinearLayout(this);
         LinearLayout forImage = new LinearLayout(this);
 
-        initButton(b, bs, image);
+        initButton(b, as, image);
         initImage(image, l);
         initMainAppView(l, line, forImage, image, b);
     }

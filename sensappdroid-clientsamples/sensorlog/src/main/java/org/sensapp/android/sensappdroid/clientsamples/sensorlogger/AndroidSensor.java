@@ -37,6 +37,7 @@ import org.sensapp.android.sensappdroid.api.SensAppUnit;
 public class AndroidSensor extends AbstractSensor{
 
     private static final String TAG = AndroidSensor.class.getSimpleName();
+    final static int DEFAULT_RATE = 500;
 
     /*final static int DEFAULT_RATE = 500;            //Default rate of the sensor measures in milliseconds
     private float[] data;                           //Array to stock data
@@ -160,6 +161,10 @@ public class AndroidSensor extends AbstractSensor{
 
     public Sensor getSensor(){
         return mSensor;
+    }
+
+    final public int getDefaultRate(){
+        return DEFAULT_RATE;
     }
        /*
     public int getMeasureTime(){

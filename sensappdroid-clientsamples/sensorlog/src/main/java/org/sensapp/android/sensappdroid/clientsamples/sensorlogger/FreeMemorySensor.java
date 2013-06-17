@@ -1,16 +1,13 @@
 package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.net.Uri;
 import android.os.BatteryManager;
-import android.os.IBinder;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import org.sensapp.android.sensappdroid.api.SensAppHelper;
+import android.os.Environment;
+import android.os.StatFs;
 import org.sensapp.android.sensappdroid.api.SensAppUnit;
 
 /**
@@ -20,11 +17,11 @@ import org.sensapp.android.sensappdroid.api.SensAppUnit;
  * Time: 13:59
  * To change this template use File | Settings | File Templates.
  */
-public class BatterySensor extends AbstractSensor {
+public class FreeMemorySensor extends AbstractSensor {
 
-    final static int DEFAULT_RATE = 5000;
+    final static int DEFAULT_RATE = 10000;
 
-    BatterySensor(String composite) {
+    FreeMemorySensor(String composite) {
         mSensor = null;
         setEntryLevel();
         initData();
@@ -44,8 +41,7 @@ public class BatterySensor extends AbstractSensor {
     }
 
     public void setData(Context context){
-        Intent batteryStatus = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        float level = (float)FreeMemory()/TotalMemory()*100;
         data[0] = level;
     }
 
@@ -70,15 +66,38 @@ public class BatterySensor extends AbstractSensor {
     }
 
     public String getType(){
-        return "TYPE_BATTERY";
+        return "TYPE_MEMORY";
     }
 
     public String getName(){
-        return mComposite+"_"+"Battery";
+        return mComposite+"_"+"Memory";
     }
 
     public SensAppUnit getUnit(){
         return SensAppUnit.PERCENT;
+    }
+
+    public int TotalMemory()
+    {
+        StatFs statFs = new StatFs(Environment.getRootDirectory().getAbsolutePath());
+        int Total = (statFs.getBlockCount() * statFs.getBlockSize()) / 1048576;
+        return Total;
+    }
+
+    public int FreeMemory()
+    {
+        StatFs statFs = new StatFs(Environment.getRootDirectory().getAbsolutePath());
+        int Free  = (statFs.getAvailableBlocks() * statFs.getBlockSize()) / 1048576;
+        return Free;
+    }
+
+    public int BusyMemory()
+    {
+        StatFs statFs = new StatFs(Environment.getRootDirectory().getAbsolutePath());
+        int Total = (statFs.getBlockCount() * statFs.getBlockSize()) / 1048576;
+        int Free  = (statFs.getAvailableBlocks() * statFs.getBlockSize()) / 1048576;
+        int Busy  = Total - Free;
+        return Busy;
     }
 
     final public int getDefaultRate(){

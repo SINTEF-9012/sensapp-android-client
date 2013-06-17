@@ -18,7 +18,7 @@ import org.sensapp.android.sensappdroid.api.SensAppUnit;
 public abstract class AbstractSensor {
     private static final String TAG = AndroidSensor.class.getSimpleName();
 
-    final static int DEFAULT_RATE = 500;            //Default rate of the sensor measures in milliseconds
+    final static int DEFAULT_RATE = 2000;            //Default rate of the sensor measures in milliseconds
     protected float[] data;                           //Array to stock data
     protected Sensor mSensor;                         //The sensor
     protected String mComposite;                      //The group where the sensor is
@@ -38,7 +38,7 @@ public abstract class AbstractSensor {
      */
     public Uri registerInSensApp(Context context, int drawable){
         Uri u = null;
-        refreshRate = PreferenceManager.getDefaultSharedPreferences(context).getInt(getName(), DEFAULT_RATE);
+        refreshRate = PreferenceManager.getDefaultSharedPreferences(context).getInt(getName(), getDefaultRate());
         if(!SensAppHelper.isCompositeRegistered(context, mComposite))
             SensAppHelper.registerComposite(context, mComposite, "List some sensors of the tablet");
         if(isOneDataSensor()){
@@ -147,4 +147,5 @@ public abstract class AbstractSensor {
     abstract public String getType();
     abstract public String getName();
     abstract public SensAppUnit getUnit();
+    abstract public int getDefaultRate();
 }
