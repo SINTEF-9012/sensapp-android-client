@@ -76,7 +76,7 @@ public class SensorActivity extends Activity{
 
         initButton(b, as, image);
         initImage(image, l);
-        initMainAppView(l, line, forImage, image, b);
+        initMainAppView(l, line, forImage, image, b, as);
     }
 
     @Override
@@ -95,12 +95,18 @@ public class SensorActivity extends Activity{
         return false;
     }
 
-    private void initMainAppView(LinearLayout l, LinearLayout line, LinearLayout img, ImageView image, Button b){
+    private void initMainAppView(LinearLayout l, LinearLayout line, LinearLayout img, final ImageView image, final Button b, final AbstractSensor as){
         img.setPadding(65, 10, 55, 0);
         img.addView(image);
         line.setPadding(0,11,50,0);
         line.addView(img);
         line.addView(b);
+        line.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                OnClick(b, as, image);
+            }
+        });
         l.addView(line);
         LinearLayout separator = new LinearLayout(this);
         separator.setMinimumHeight(1);
@@ -118,50 +124,54 @@ public class SensorActivity extends Activity{
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
-                    // If service is not running.
-
-                    // Check if SensApp is installed.
-                    if (!SensAppHelper.isSensAppInstalled(getApplicationContext())) {
-                        // If not suggest to install and return.
-                        SensAppHelper.getInstallationDialog(SensorActivity.this).show();
-                        return;
-                    }
-                }
-
-                if (as.isListened()) {
-                    as.setListened(false);
-                    b.setText("Start logging " + as.getName());
-                    image.setImageResource(R.drawable.button_round_red);
-
-                    if(SensorLoggerService.noSensorListened() && preferences.getBoolean(SERVICE_RUNNING, false)){
-                        // Service is running so it must stop.
-                        // Update the preference.
-                        preferences.edit().putBoolean(SERVICE_RUNNING, false).commit();
-                        // Request for disable, cancel the alarm.
-                        AlarmHelper.cancelAlarm(getApplicationContext());
-                    }
-                } else {
-                    as.setListened(true);
-                    b.setText("Stop logging " + as.getName());
-                    image.setImageResource(R.drawable.button_round_green);
-
-                    if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
-                        // Update the preference. Service is now running.
-                        preferences.edit().putBoolean(SERVICE_RUNNING, true).commit();
-                        // Schedule a repeating alarm to start the service, which stops itself.
-                        AlarmHelper.setAlarm(getApplicationContext());
-                    }
-                }
+                OnClick(b, as, image);
             }
         });
     }
 
-    private void initImage(ImageView img, LinearLayout l){
+    private void initImage(final ImageView img, LinearLayout l){
         img.setImageResource(R.drawable.button_round_red);
         img.setMinimumWidth(l.getWidth());
         img.setScaleType(ImageView.ScaleType.FIT_START);
+    }
+
+    private void OnClick(Button b, AbstractSensor as, ImageView image){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
+            // If service is not running.
+
+            // Check if SensApp is installed.
+            if (!SensAppHelper.isSensAppInstalled(getApplicationContext())) {
+                // If not suggest to install and return.
+                SensAppHelper.getInstallationDialog(SensorActivity.this).show();
+                return;
+            }
+        }
+
+        if (as.isListened()) {
+            as.setListened(false);
+            b.setText("Start logging " + as.getName());
+            image.setImageResource(R.drawable.button_round_red);
+
+            if(SensorLoggerService.noSensorListened() && preferences.getBoolean(SERVICE_RUNNING, false)){
+                // Service is running so it must stop.
+                // Update the preference.
+                preferences.edit().putBoolean(SERVICE_RUNNING, false).commit();
+                // Request for disable, cancel the alarm.
+                AlarmHelper.cancelAlarm(getApplicationContext());
+            }
+        } else {
+            as.setListened(true);
+            b.setText("Stop logging " + as.getName());
+            image.setImageResource(R.drawable.button_round_green);
+
+            if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
+                // Update the preference. Service is now running.
+                preferences.edit().putBoolean(SERVICE_RUNNING, true).commit();
+                // Schedule a repeating alarm to start the service, which stops itself.
+                AlarmHelper.setAlarm(getApplicationContext());
+            }
+        }
     }
 }
 
