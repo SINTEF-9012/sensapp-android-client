@@ -50,7 +50,22 @@ public class SensorLoggerService extends Service implements SensorEventListener{
             // Get all the sensors of the Android.
             sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
             initSensors();
-
+            for(AbstractSensor as : sensors){
+                if(as.isListened()){
+                    if(as.getClass() != AndroidSensor.class && (System.currentTimeMillis() - as.getLastMeasure() > as.getMeasureTime())) {
+                        as.setData(this);
+                        as.setMeasured();            //at least one measure
+                        as.setFreshMeasure(true);    //a new measure has been made
+                        insertMeasures();           //put it into local database
+                        as.setLastMeasure();         //refresh time of the last measure
+                        as.setFreshMeasure(false);   //no more last measure
+                        if(allSensorsMeasured()) {
+                            unsetSensorListening();
+                        }
+                    }
+                }
+            }
+            stopSelf();
 		} else {
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
             editor.putBoolean(SensorActivity.SERVICE_RUNNING, false).commit();
@@ -97,18 +112,6 @@ public class SensorLoggerService extends Service implements SensorEventListener{
 
             if(s.getLastMeasure() == 0)
                 s.setLastMeasure();
-            for(AbstractSensor as : sensors){
-                if(as.isListened()){
-                    if(as.getClass() != AndroidSensor.class && (System.currentTimeMillis() - as.getLastMeasure() > as.getMeasureTime())) {
-                        as.setData(this);
-                        as.setMeasured();            //at least one measure
-                        as.setFreshMeasure(true);    //a new measure has been made
-                        insertMeasures();           //put it into local database
-                        as.setLastMeasure();         //refresh time of the last measure
-                        as.setFreshMeasure(false);   //no more last measure
-                    }
-                }
-            }
 
             if((s.getLastMeasure() != 0) && (System.currentTimeMillis() - s.getLastMeasure() > s.getMeasureTime())){
                 s.setMeasured();
