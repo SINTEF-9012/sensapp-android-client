@@ -21,7 +21,9 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.view.*;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -40,7 +42,7 @@ public class SensorActivity extends Activity{
     private static final String TAG = SensorActivity.class.getSimpleName();
 
     final static int GREY=0xFFCCDDFF;
-    final static String compositeName = "Android_Tab";
+    final static String compositeName = Build.MODEL + Build.ID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

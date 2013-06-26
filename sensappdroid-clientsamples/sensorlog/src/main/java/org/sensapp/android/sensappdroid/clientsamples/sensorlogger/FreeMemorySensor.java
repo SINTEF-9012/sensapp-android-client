@@ -85,7 +85,7 @@ public class FreeMemorySensor extends AbstractSensor {
     }
 
     public String getName(){
-        return mComposite+"_"+"Memory";
+        return "Memory";
     }
 
     public SensAppUnit getUnit(){

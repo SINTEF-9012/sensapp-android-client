@@ -212,7 +212,7 @@ public class AndroidSensor extends AbstractSensor{
             case Sensor.TYPE_TEMPERATURE:strType = "Temperature";break;
             default:    strType = "Unknown";break;
         }
-        return mComposite+"_"+strType;
+        return strType;
     }
 
     public SensAppUnit getUnit() {

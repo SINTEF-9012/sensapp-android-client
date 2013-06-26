@@ -89,7 +89,7 @@ public class BatterySensor extends AbstractSensor {
     }
 
     public String getName(){
-        return mComposite+"_"+"Battery";
+        return "Battery";
     }
 
     public SensAppUnit getUnit(){

@@ -57,18 +57,18 @@ public abstract class AbstractSensor {
         if(!SensAppHelper.isCompositeRegistered(context, mComposite))
             SensAppHelper.registerComposite(context, mComposite, "List some sensors of the tablet");
         if(isOneDataSensor()){
-            u = SensAppHelper.registerNumericalSensor(context, getName(), getType(), getUnit(), drawable);
-            if(!SensAppHelper.isComposeRegistered(context, mComposite, getName()))
-                SensAppHelper.registerCompose(context, getName()+"1", mComposite, getName());
+            u = SensAppHelper.registerNumericalSensor(context, getFullName(), getType(), getUnit(), drawable);
+            if(!SensAppHelper.isComposeRegistered(context, mComposite, getFullName()))
+                SensAppHelper.registerCompose(context, getName()+"1", mComposite, getFullName());
         }
         else if(isThreeDataSensor()){
-            u = SensAppHelper.registerNumericalSensor(context, getName()+"X", getType(), getUnit(), drawable);
-            SensAppHelper.registerNumericalSensor(context, getName()+"Y", getType(), getUnit(), drawable);
-            SensAppHelper.registerNumericalSensor(context, getName()+"Z", getType(), getUnit(), drawable);
-            if(!SensAppHelper.isComposeRegistered(context, mComposite, getName()+"X")){
-                SensAppHelper.registerCompose(context, getName()+"1", mComposite, getName()+"X");
-                SensAppHelper.registerCompose(context, getName()+"2", mComposite, getName()+"Y");
-                SensAppHelper.registerCompose(context, getName()+"3", mComposite, getName()+"Z");
+            u = SensAppHelper.registerNumericalSensor(context, getFullName()+"X", getType(), getUnit(), drawable);
+            SensAppHelper.registerNumericalSensor(context, getFullName()+"Y", getType(), getUnit(), drawable);
+            SensAppHelper.registerNumericalSensor(context, getFullName()+"Z", getType(), getUnit(), drawable);
+            if(!SensAppHelper.isComposeRegistered(context, mComposite, getFullName()+"X")){
+                SensAppHelper.registerCompose(context, getFullName()+"1", mComposite, getFullName()+"X");
+                SensAppHelper.registerCompose(context, getFullName()+"2", mComposite, getFullName()+"Y");
+                SensAppHelper.registerCompose(context, getFullName()+"3", mComposite, getFullName()+"Z");
             }
         }
         return u;
@@ -163,4 +163,8 @@ public abstract class AbstractSensor {
     abstract public String getName();
     abstract public SensAppUnit getUnit();
     abstract public int getDefaultRate();
+
+    public String getFullName(){
+        return mComposite+"_"+getName();
+    }
 }
