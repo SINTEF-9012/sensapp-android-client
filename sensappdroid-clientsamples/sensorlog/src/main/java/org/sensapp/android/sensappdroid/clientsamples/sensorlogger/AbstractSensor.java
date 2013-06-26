@@ -83,15 +83,15 @@ public abstract class AbstractSensor {
             if(isFreshMeasure()){
                 Uri measureUri;
                 if(isOneDataSensor()){
-                    measureUri = SensAppHelper.insertMeasure(context, getName(), data[0]);
+                    measureUri = SensAppHelper.insertMeasure(context, getFullName(), data[0]);
                     Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
                 }
                 else if(isThreeDataSensor()){
-                    measureUri = SensAppHelper.insertMeasure(context, getName()+"X", data[0]);
+                    measureUri = SensAppHelper.insertMeasure(context, getFullName()+"X", data[0]);
                     Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
-                    measureUri = SensAppHelper.insertMeasure(context, getName()+"Y", data[1]);
+                    measureUri = SensAppHelper.insertMeasure(context, getFullName()+"Y", data[1]);
                     Log.i(TAG, "New measure (" + data[1] + ") available at " + measureUri);
-                    measureUri = SensAppHelper.insertMeasure(context, getName()+"Z", data[2]);
+                    measureUri = SensAppHelper.insertMeasure(context, getFullName()+"Z", data[2]);
                     Log.i(TAG, "New measure (" + data[2] + ") available at " + measureUri);
                 }
             }
