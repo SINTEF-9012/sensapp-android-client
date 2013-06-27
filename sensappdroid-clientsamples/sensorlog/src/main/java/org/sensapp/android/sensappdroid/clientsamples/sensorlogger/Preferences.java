@@ -19,7 +19,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.*;
 import android.preference.Preference.OnPreferenceChangeListener;
-import com.sun.xml.internal.ws.api.server.AbstractServerAsyncTransport;
 
 import java.util.List;
 
