@@ -9,11 +9,33 @@
     <name>SensApp Android :: Client :: SensorLog</name>
     <description>SensApp android simple client example - Sensors logger</description>
 
+    <repositories>
+        <repository>
+            <id>thingml-release</id>
+            <name>thingml-release</name>
+            <url>http://maven.thingml.org/thingml-release</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <ciManagement>
+        <system>jenkins</system>
+        <url>http://build.thingml.org/job/Build%20SensApp%20Android/org.sensapp.android$sensorlog</url>
+    </ciManagement>
+
     <properties>
         <sensappdroid-contract.version>1.1-SNAPSHOT</sensappdroid-contract.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<platform.version> 4.1.1.4
-			</platform.version>
+		<platform.version>4.1.1.4</platform.version>
+
+        <jackson.version>1.9.7</jackson.version>
+        <headerdir>${project.parent.basedir}</headerdir>
+        <findbugs-exclude.location>${project.parent.basedir}/reporting/findbugs-exclude.xml</findbugs-exclude.location>
+        <maven-checkstyle-plugin.configLocation>${project.parent.basedir}/reporting/checkstyle.xml</maven-checkstyle-plugin.configLocation>
+        <maven-pmd-plugin.configLocation>${project.parent.basedir}/reporting/pmd.xml</maven-pmd-plugin.configLocation>
+
 		<android.plugin.version>3.3.0</android.plugin.version>
         <plugin.maven-jarsigner.version>1.2</plugin.maven-jarsigner.version>
 
@@ -119,7 +141,7 @@
                     <zipalign>
                         <verbose>true</verbose>
                         <skip>false</skip>
-                        <inputApk>${project.build.directory}/${project.artifactId}-${project.version}.apk</inputApk>
+                        <inputApk>${project.build.directory}/${project.artifactId}.apk</inputApk>
                         <outputApk>${project.build.directory}/${project.artifactId}-aligned.apk</outputApk>
                     </zipalign>
 
