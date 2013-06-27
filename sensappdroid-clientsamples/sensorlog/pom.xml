@@ -16,6 +16,7 @@
 			</platform.version>
 		<android.plugin.version>3.5.3</android.plugin.version>
         <proguard.skip>false</proguard.skip>
+        <zipalign.skip>false</zipalign.skip>
 	</properties>
 
     <dependencyManagement>
