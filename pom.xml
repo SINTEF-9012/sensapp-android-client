@@ -225,7 +225,7 @@
 	  <artifactId>maven-deploy-plugin</artifactId>
 	  <version>${plugin.deploy.version}</version>
 	</plugin>
-	<plugin>
+	<!--<plugin>
 	  <groupId>com.jayway.maven.plugins.android.generation2</groupId>
 	  <artifactId>android-maven-plugin</artifactId>
 	  <version>${plugin.android-maven.version}</version>
@@ -234,7 +234,7 @@
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-jarsigner-plugin</artifactId>
 	  <version>${plugin.maven-jarsigner.version}</version>
-	</plugin>
+	</plugin>-->
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-project-info-reports-plugin</artifactId>
