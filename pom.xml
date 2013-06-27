@@ -230,11 +230,11 @@
 	  <artifactId>android-maven-plugin</artifactId>
 	  <version>${plugin.android-maven.version}</version>
 	</plugin>
-	<!--<plugin>
+	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-jarsigner-plugin</artifactId>
 	  <version>${plugin.maven-jarsigner.version}</version>
-	</plugin>-->
+	</plugin>
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-project-info-reports-plugin</artifactId>
