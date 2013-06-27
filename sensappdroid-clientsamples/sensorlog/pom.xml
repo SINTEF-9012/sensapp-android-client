@@ -81,6 +81,7 @@
 
                     <zipalign>
                         <verbose>true</verbose>
+                        <skip>false</skip>
                         <inputApk>${project.build.directory}/${project.artifactId}-${project.version}.apk</inputApk>
                         <outputApk>${project.build.directory}/${project.artifactId}-aligned.apk</outputApk>
                     </zipalign>
