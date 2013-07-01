@@ -16,26 +16,36 @@
 
 -->
 <LinearLayout
-xmlns:android="http://schemas.android.com/apk/res/android"
-android:id="@+id/general_view"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:orientation="vertical" android:background="#000000" android:baselineAligned="true"
-        >
-
-<TextView
-        android:id="@+id/app_title"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#000000">
+    <ScrollView
         android:layout_width="fill_parent"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:textSize="25sp"
-        android:textColor="#ffffff"
-        android:background="#000000" android:gravity="center_vertical|center_horizontal"/>
-    <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="8dp"
-            android:id="@+id/textView" android:layout_gravity="center" android:background="#CCDDFF"
-            android:autoText="true" android:layout_marginTop="-5dp" android:singleLine="false"/>
-    <!--android:layout_marginTop="100dp"-->
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/general_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#000000"
+            android:baselineAligned="true">
 
+            <TextView
+                android:id="@+id/app_title"
+                android:layout_width="fill_parent"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:textSize="25sp"
+                android:textColor="#ffffff"
+                android:background="#000000" android:gravity="center_vertical|center_horizontal"/>
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="8dp"
+                android:id="@+id/textView" android:layout_gravity="center" android:background="#CCDDFF"
+                android:autoText="true" android:layout_marginTop="-5dp" android:singleLine="false"/>
+        <!--android:layout_marginTop="100dp"-->
+
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

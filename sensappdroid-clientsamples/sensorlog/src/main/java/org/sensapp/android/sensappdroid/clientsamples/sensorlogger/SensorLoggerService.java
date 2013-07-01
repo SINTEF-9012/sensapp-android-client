@@ -202,9 +202,11 @@ public class SensorLoggerService extends Service implements SensorEventListener{
     }
 
     static public boolean noSensorListened(){
-        for(AbstractSensor s : sensors){
-            if(s.isListened())
-                return false;
+        if(sensors != null){
+            for(AbstractSensor s : sensors){
+                if(s.isListened())
+                    return false;
+            }
         }
         return true;
     }
