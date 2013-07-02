@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Build;
+import android.os.Debug;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.view.*;
@@ -47,6 +48,7 @@ public class SensorActivity extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Debug.startMethodTracing("SensorActivity");
         setContentView(R.layout.activity_main);
         TextView title = (TextView)findViewById(R.id.app_title);
         title.setText(R.string.app_title);
@@ -171,9 +173,15 @@ public class SensorActivity extends Activity{
                 // Update the preference. Service is now running.
                 preferences.edit().putBoolean(SERVICE_RUNNING, true).commit();
                 // Schedule a repeating alarm to start the service, which stops itself.
-                AlarmHelper.setAlarm(getApplicationContext());
+                AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime());
             }
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //Debug.stopMethodTracing();
     }
 }
 

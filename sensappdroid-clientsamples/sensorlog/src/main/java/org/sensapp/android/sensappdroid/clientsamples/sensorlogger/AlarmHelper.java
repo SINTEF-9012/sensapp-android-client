@@ -31,10 +31,10 @@ public final class AlarmHelper {
 	
 	private AlarmHelper() {}
 	
-	protected static void setAlarm(Context context) {
+	protected static void setAlarm(Context context, int refresh_rate) {
 		Intent startService = new Intent(context, SensorLoggerService.class);
 		PendingIntent pendingIntent = PendingIntent.getService(context, 0, startService, PendingIntent.FLAG_CANCEL_CURRENT);
-		((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), REFRESH_RATE, pendingIntent);
+		((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), refresh_rate, pendingIntent);
 		
 		@SuppressWarnings("deprecation") // We don't want target only API 16...
 		Notification notification = new Notification.Builder(context)
