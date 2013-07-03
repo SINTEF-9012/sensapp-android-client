@@ -46,6 +46,8 @@ public class SensorLoggerService extends Service implements SensorEventListener{
 	@Override
 	public void onCreate() {
 		super.onCreate();
+        if(sensors.isEmpty())
+            stopSelf();
 		if (SensAppHelper.isSensAppInstalled(getApplicationContext())) {
             // Get all the sensors of the Android.
             sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);

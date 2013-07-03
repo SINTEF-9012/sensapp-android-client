@@ -18,13 +18,11 @@ package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Debug;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.view.*;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -71,15 +69,18 @@ public class SensorActivity extends Activity{
     }
 
     private void addAbstractSensor(AbstractSensor as, LinearLayout l){
-        as.setRefreshRate(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getInt(as.getName(), as.getDefaultRate()));
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        as.setRefreshRate(sp.getInt(as.getName(), as.getDefaultRate()));
         SensorLoggerService.addSensor(as);
         final Button b = new Button(this);
         final ImageView image = new ImageView(this);
         LinearLayout line = new LinearLayout(this);
         LinearLayout forImage = new LinearLayout(this);
 
+        as.setListened(sp.getBoolean(as.getFullName(), false));
+
         initButton(b, as, image);
-        initImage(image, l);
+        initImage(image, l, as);
         initMainAppView(l, line, forImage, image, b, as);
     }
 
@@ -133,8 +134,13 @@ public class SensorActivity extends Activity{
         });
     }
 
-    private void initImage(final ImageView img, LinearLayout l){
-        img.setImageResource(R.drawable.button_round_red);
+    private void initImage(final ImageView img, LinearLayout l, AbstractSensor as){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
+        if(isPrefListenedTrue)
+            img.setImageResource(R.drawable.button_round_green);
+        else
+            img.setImageResource(R.drawable.button_round_red);
         img.setMinimumWidth(l.getWidth());
         img.setScaleType(ImageView.ScaleType.FIT_START);
     }
@@ -176,6 +182,7 @@ public class SensorActivity extends Activity{
                 AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime());
             }
         }
+        preferences.edit().putBoolean(as.getFullName(), as.isListened()).commit();
     }
 
     @Override
