@@ -40,26 +40,30 @@ public class SensorLoggerService extends Service implements SensorEventListener{
 
 	private static final String TAG = SensorLoggerService.class.getSimpleName();
 
-    SensorManager sensorManager;
+    static SensorManager sensorManager = null;
     static List<AbstractSensor> sensors;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-        if(sensors.isEmpty())
+        //Log.d("coucou", "create");
+        if(sensors.isEmpty()){
             stopSelf();
+        }
 		if (SensAppHelper.isSensAppInstalled(getApplicationContext())) {
             // Get all the sensors of the Android.
-            sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+            if(sensorManager == null)
+                sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
             initSensors();
             for(AbstractSensor as : sensors){
                 if(as.isListened()){
-                    if(as.getClass() != AndroidSensor.class && (System.currentTimeMillis() - as.getLastMeasure() > as.getMeasureTime())) {
+                    if(as.getClass() != AndroidSensor.class /*&& (System.currentTimeMillis() - as.getLastMeasure() > as.getMeasureTime())*/) {
                         as.setData(this);
-                        as.setMeasured();            //at least one measure
+                        //as.setMeasured();            //at least one measure
                         as.setFreshMeasure(true);    //a new measure has been made
-                        insertMeasures();           //put it into local database
-                        as.setLastMeasure();         //refresh time of the last measure
+                        //insertMeasures();           //put it into local database
+                        as.insertMeasure(getApplicationContext());
+                        //as.setLastMeasure();         //refresh time of the last measure
                         as.setFreshMeasure(false);   //no more last measure
                         if(allSensorsMeasured()) {
                             unsetSensorListening();
@@ -68,18 +72,21 @@ public class SensorLoggerService extends Service implements SensorEventListener{
                 }
             }
             stopSelf();
+            unsetSensorListening();
+            //Log.d("coucou", "closed");
 		} else {
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
             editor.putBoolean(SensorActivity.SERVICE_RUNNING, false).commit();
 			AlarmHelper.cancelAlarm(getApplicationContext());
-			Log.e(TAG, "SensApp has been uninstalled");
+			//Log.e(TAG, "SensApp has been uninstalled");
 		}
 
 	}
 
     private void initSensors(){
-        if(noSensorListened())
+        if(noSensorListened()){
             stopSelf();
+        }
 
         for(AbstractSensor s: sensors){
             try{
@@ -89,15 +96,15 @@ public class SensorLoggerService extends Service implements SensorEventListener{
                     sensorManager.unregisterListener(this, s.getSensor());
 
                 Uri sensorUri = s.registerInSensApp(getApplicationContext(), R.drawable.ic_launcher);
-                if (sensorUri == null) {
+                /*if (sensorUri == null) {
                     // The sensor is already registered.
                     Log.w(TAG, s.getName() + " is already registered");
                 } else {
                     // The sensor is newly inserted.
                     Log.i(TAG, s.getName() + " available at " + sensorUri);
-                }
+                } */
             } catch (IllegalArgumentException e) {
-                Log.e(TAG, e.getMessage());
+                //Log.e(TAG, e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -124,9 +131,10 @@ public class SensorLoggerService extends Service implements SensorEventListener{
                 if(allSensorsMeasured()) {
                     unsetSensorListening();
                 }
-                stopSelf();
             }
         }
+        stopSelf();
+        //Log.d("coucou", "closed");
     }
 
     private void unsetSensorListening(){

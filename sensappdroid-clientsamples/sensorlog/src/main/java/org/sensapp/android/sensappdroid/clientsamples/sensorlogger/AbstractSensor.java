@@ -84,19 +84,19 @@ public abstract class AbstractSensor {
                 Uri measureUri;
                 if(isOneDataSensor()){
                     measureUri = SensAppHelper.insertMeasure(context, getFullName(), data[0]);
-                    Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
+                    //.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
                 }
                 else if(isThreeDataSensor()){
                     measureUri = SensAppHelper.insertMeasure(context, getFullName()+"X", data[0]);
-                    Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
+                    //Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
                     measureUri = SensAppHelper.insertMeasure(context, getFullName()+"Y", data[1]);
-                    Log.i(TAG, "New measure (" + data[1] + ") available at " + measureUri);
+                    //Log.i(TAG, "New measure (" + data[1] + ") available at " + measureUri);
                     measureUri = SensAppHelper.insertMeasure(context, getFullName()+"Z", data[2]);
-                    Log.i(TAG, "New measure (" + data[2] + ") available at " + measureUri);
+                    //Log.i(TAG, "New measure (" + data[2] + ") available at " + measureUri);
                 }
             }
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, e.getMessage());
+            //Log.e(TAG, e.getMessage());
             e.printStackTrace();
         }
     }

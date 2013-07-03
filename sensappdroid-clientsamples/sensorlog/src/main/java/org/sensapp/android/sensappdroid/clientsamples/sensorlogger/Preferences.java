@@ -19,6 +19,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.*;
 import android.preference.Preference.OnPreferenceChangeListener;
+import android.text.method.DigitsKeyListener;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class Preferences extends PreferenceActivity {
             //Set the sensors into 'preferences'
             for(AbstractSensor s: sensors){
                 EditTextPreference sNew = new EditTextPreference(getActivity());
+                sNew.getEditText().setKeyListener(DigitsKeyListener.getInstance());
                 sNew.setTitle(s.getName());
                 sNew.setDialogTitle("Enter the refresh rate you wish for this sensor.");
                 sNew.setDefaultValue(((Integer) s.getMeasureTime()).toString());
