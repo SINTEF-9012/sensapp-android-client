@@ -57,7 +57,7 @@ public class SensorLoggerService extends Service implements SensorEventListener{
             initSensors();
             for(AbstractSensor as : sensors){
                 if(as.isListened()){
-                    if(as.getClass() != AndroidSensor.class /*&& (System.currentTimeMillis() - as.getLastMeasure() > as.getMeasureTime()*/)) {
+                    if(as.getClass() != AndroidSensor.class /*&& (System.currentTimeMillis() - as.getLastMeasure() > as.getMeasureTime())*/) {
                         as.setData(this);
                         as.setMeasured();            //at least one measure
                         as.setFreshMeasure(true);    //a new measure has been made
