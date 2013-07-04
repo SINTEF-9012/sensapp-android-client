@@ -64,14 +64,15 @@ public class SensorLoggerService extends Service implements SensorEventListener{
                         insertMeasures();           //put it into local database
                         as.setLastMeasure();         //refresh time of the last measure
                         as.setFreshMeasure(false);   //no more last measure
-                        if(allSensorsMeasured()) {
+                        /*if(allSensorsMeasured()) {
                             unsetSensorListening();
-                        }
+                        } */
+
                     }
                 }
             }
             stopSelf();
-            unsetSensorListening();
+            //unsetSensorListening();
             //Log.d("coucou", "closed");
 		} else {
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
@@ -127,9 +128,10 @@ public class SensorLoggerService extends Service implements SensorEventListener{
                 insertMeasures();
                 s.setLastMeasure();
                 s.setFreshMeasure(false);
-                if(allSensorsMeasured()) {
+                /*if(allSensorsMeasured()) {
                     unsetSensorListening();
-                }
+                } */
+                sensorManager.unregisterListener(this, s.getSensor());
             }
         }
         stopSelf();
