@@ -23,6 +23,7 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Debug;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.*;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -118,10 +119,19 @@ public class SensorActivity extends Activity{
         separator.setMinimumWidth(l.getWidth());
         separator.setBackgroundColor(GREY);
         l.addView(separator);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
+        if(isPrefListenedTrue)
+            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime());
     }
 
     private void initButton(final Button b, final AbstractSensor as, final ImageView image){
-        b.setText("Start logging " + as.getName());
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
+        if(isPrefListenedTrue)
+            b.setText("Stop logging " + as.getName());
+        else
+            b.setText("Start logging " + as.getName());
         b.setBackgroundColor(Color.BLACK);
         b.setMinimumHeight(50);
         b.setTextColor(Color.WHITE);
@@ -187,6 +197,7 @@ public class SensorActivity extends Activity{
 
     @Override
     public void onDestroy() {
+        //AlarmHelper.cancelAlarm(getApplicationContext());
         super.onDestroy();
         //Debug.stopMethodTracing();
     }
