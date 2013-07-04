@@ -42,7 +42,7 @@ public class SensorActivity extends Activity{
     private static final String TAG = SensorActivity.class.getSimpleName();
 
     final static int GREY=0xFFCCDDFF;
-    final static String compositeName = Build.MODEL + Build.ID;
+    static String compositeName = Build.MODEL + Build.ID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

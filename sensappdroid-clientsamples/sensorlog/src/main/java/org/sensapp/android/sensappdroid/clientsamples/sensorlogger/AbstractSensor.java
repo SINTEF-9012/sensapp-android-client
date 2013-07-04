@@ -167,4 +167,8 @@ public abstract class AbstractSensor {
     public String getFullName(){
         return mComposite+"_"+getName();
     }
+
+    public void setCompositeName(String newName){
+        mComposite = newName;
+    }
 }

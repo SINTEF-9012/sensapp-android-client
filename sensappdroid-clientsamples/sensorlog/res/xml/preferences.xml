@@ -19,7 +19,15 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <PreferenceCategory
             android:title="General">
+        <EditTextPreference
+                android:id="@+id/pref_composite_name"
+                android:key="@string/pref_compositename_key"
+                android:title="Device Name"
+                android:dialogTitle="Set the name you want for your device"/>
+    </PreferenceCategory>
 
+    <PreferenceCategory
+            android:title="Sensor delay">
 
     </PreferenceCategory>
 </PreferenceScreen>

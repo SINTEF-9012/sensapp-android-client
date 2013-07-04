@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.preference.*;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.text.method.DigitsKeyListener;
+import org.sensapp.android.sensappdroid.api.SensAppHelper;
 
 import java.util.List;
 
@@ -34,6 +35,32 @@ public class Preferences extends PreferenceActivity {
 			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.xml.preferences);
             List<AbstractSensor> sensors = SensorLoggerService.getSensors();
+            final EditTextPreference compositeName = (EditTextPreference) findPreference(getString(R.string.pref_compositename_key));
+            final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+
+            compositeName.setDefaultValue(sp.getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName));
+            compositeName.setSummary(sp.getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName));
+            compositeName.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    String lastName = sp.getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName);
+
+                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+                    String name = (String)newValue;
+                    editor.putString(getString(R.string.pref_compositename_key), name).commit();
+                    compositeName.setSummary(name);
+
+                    if(name!=lastName){
+                        SensorActivity.compositeName = name;
+                        if(SensorLoggerService.sensors != null){
+                            for(AbstractSensor s : SensorLoggerService.sensors)
+                                s.setCompositeName(name);
+                        }
+                    }
+
+                    return true;
+                }
+            });
 
             //Set the sensors into 'preferences'
             for(AbstractSensor s: sensors){
@@ -52,7 +79,7 @@ public class Preferences extends PreferenceActivity {
                         if (((String) newValue).isEmpty()) {
                             return false;
                         }
-                        AbstractSensor toChange = SensorLoggerService.getSensorByName((String)preference.getTitle());
+                        AbstractSensor toChange = SensorLoggerService.getSensorByName((String) preference.getTitle());
                         toChange.setRefreshRate(Integer.parseInt((String) newValue));
 
                         AlarmHelper.cancelAlarm(getActivity().getApplicationContext());
@@ -62,7 +89,7 @@ public class Preferences extends PreferenceActivity {
                         editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
                         editor.putInt(toChange.getName(), toChange.getMeasureTime());
                         editor.commit();
-                        preference.setSummary(((Integer)toChange.getMeasureTime()).toString());
+                        preference.setSummary(((Integer) toChange.getMeasureTime()).toString());
                         return true;
                     }
                 });
