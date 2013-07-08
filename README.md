@@ -8,7 +8,7 @@ There is also some other "sensors" implemented which show that every kind of dat
 Download
 ---------------------
 * [Latest release build](https://play.google.com/store/apps/details?id=org.sensapp.android.sensappdroid.clientsamples.sensorlogger): available on the Google Play.
-* [Latest snapshot build](http://build.thingml.org/job/Build%20SensApp%20Android/lastSuccessfulBuild/org.sensapp.android$sensappdroid-main/): intall the *sensappdroid-main-X.X.X-SNAPSHOT-aligned.apk* file.
+* [Latest snapshot build](http://build.thingml.org/job/Build%20SensApp%20Android/lastSuccessfulBuild/org.sensapp.android$sensappdroid-main/): intall the *sensorlog-X.X.X-SNAPSHOT-aligned.apk* file.
 
 Bugs and Feature requests
 -------------------------
