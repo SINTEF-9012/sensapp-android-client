@@ -15,6 +15,9 @@
  */
 package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -48,6 +51,10 @@ public class SensorActivity extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Intent startService = new Intent(getApplicationContext(), SensorManagerService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0, startService, PendingIntent.FLAG_ONE_SHOT);
+        ((AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent);
+
         //Debug.startMethodTracing("SensorActivity");
         setContentView(R.layout.activity_main);
         TextView title = (TextView)findViewById(R.id.app_title);
@@ -57,7 +64,9 @@ public class SensorActivity extends Activity{
 
         compositeName = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName);
 
+
         final LinearLayout l = (LinearLayout) findViewById(R.id.general_view);
+
         //Add all the Android sensors
         SensorManager mManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         for(Sensor s: mManager.getSensorList(Sensor.TYPE_ALL)){
@@ -125,7 +134,7 @@ public class SensorActivity extends Activity{
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
         if(isPrefListenedTrue){
-            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime(), as);
+            SensorManagerService.setLog(getApplicationContext(), as);
             sp.edit().putBoolean(SERVICE_RUNNING, true).commit();
         }
     }
@@ -133,7 +142,7 @@ public class SensorActivity extends Activity{
     private void initButton(final Button b, final AbstractSensor as, final ImageView image){
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
-        if(isPrefListenedTrue)
+        if(as.isListened())
             b.setText("Stop logging " + as.getName());
         else
             b.setText("Start logging " + as.getName());
@@ -152,7 +161,7 @@ public class SensorActivity extends Activity{
     private void initImage(final ImageView img, LinearLayout l, AbstractSensor as){
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
-        if(isPrefListenedTrue)
+        if(as.isListened())
             img.setImageResource(R.drawable.button_round_green);
         else
             img.setImageResource(R.drawable.button_round_red);
@@ -184,7 +193,7 @@ public class SensorActivity extends Activity{
                 preferences.edit().putBoolean(SERVICE_RUNNING, false).commit();
                 // Request for disable, cancel the alarm.
             }
-            AlarmHelper.cancelAlarm(getApplicationContext(), as);
+            SensorManagerService.cancelLog(getApplicationContext(), as);
         } else {
             as.setListened(true);
             b.setText("Stop logging " + as.getName());
@@ -197,14 +206,13 @@ public class SensorActivity extends Activity{
                 // Schedule a repeating alarm to start the service, which stops itself.
 
             }
-            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime(), as);
+            SensorManagerService.setLog(getApplicationContext(), as);
         }
         preferences.edit().putBoolean(as.getFullName(), as.isListened()).commit();
     }
 
     @Override
     public void onDestroy() {
-        //AlarmHelper.cancelAlarm(getApplicationContext());
         super.onDestroy();
         //Debug.stopMethodTracing();
     }

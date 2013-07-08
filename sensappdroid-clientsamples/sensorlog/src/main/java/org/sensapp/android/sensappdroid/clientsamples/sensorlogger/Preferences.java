@@ -84,8 +84,9 @@ public class Preferences extends PreferenceActivity {
                         toChange.setRefreshRate(Integer.parseInt((String) newValue));
 
                         if(toChange.isListened()){
-                            AlarmHelper.cancelAlarm(getActivity().getApplicationContext(), toChange);
-                            AlarmHelper.setAlarm(getActivity().getApplicationContext(), Integer.parseInt((String) newValue), toChange);
+
+                            SensorManagerService.cancelLog(getActivity().getApplicationContext(), toChange);
+                            SensorManagerService.setLog(getActivity().getApplicationContext(), toChange);
                         }
 
                         SharedPreferences.Editor editor;

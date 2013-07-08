@@ -64,7 +64,7 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
         if (SensAppHelper.isSensAppInstalled(context)) {
             if(sensors != null && sensor != null){
                 registerAndListenSensor();
-                if(sensor.getClass() != AndroidSensor.class && (System.currentTimeMillis() - sensor.getLastMeasure()) > sensor.getMeasureTime()){
+                if(sensor.getClass() != AndroidSensor.class){
                     sensor.setData(context);
                     sensor.insertMeasure(context);
                     sensor.setLastMeasure(); //refresh time of the last measure
@@ -104,11 +104,13 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
     }
 
     static public void addSensor(AbstractSensor as){
-        sensors.add(as);
+        if(!sensors.contains(as))
+            sensors.add(as);
     }
 
     static public void initSensorArray(){
-        sensors = new ArrayList<AbstractSensor>();
+        if(sensors == null)
+            sensors = new ArrayList<AbstractSensor>();
     }
 
     static public List<AbstractSensor> getSensors(){

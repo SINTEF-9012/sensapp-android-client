@@ -169,4 +169,14 @@ public abstract class AbstractSensor {
     public void setCompositeName(String newName){
         mComposite = newName;
     }
+
+    @Override
+    public boolean equals(Object o){
+        if(o.getClass() == this.getClass()){
+            AbstractSensor a = (AbstractSensor) o;
+            return this.getName().equals(a.getName());
+        }
+        else
+            return super.equals(o);
+    }
 }
