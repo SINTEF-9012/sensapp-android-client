@@ -24,6 +24,6 @@ https://github.com/SINTEF-9012/sensapp-android-client
 
 Screenshot
 -------------------------
-![SensorLog Start Screen](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshots/startscreen.png) ![Sensors Logging](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshots/startedsensors.png) ![Settings Screen](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshots/settingsscreen.png) ! [Setting Edit](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshots/settingedit.png).
+![SensorLog Start Screen](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshot/startscreen.png) ![Sensors Logging](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshot/startedsensors.png) ![Settings Screen](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshot/settingsscreen.png) ![Setting Edit](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshot/settingedit.png).
 
 
