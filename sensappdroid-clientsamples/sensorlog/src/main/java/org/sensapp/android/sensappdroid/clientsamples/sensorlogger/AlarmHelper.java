@@ -19,6 +19,7 @@ import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
@@ -31,9 +32,10 @@ public final class AlarmHelper {
 	
 	private AlarmHelper() {}
 	
-	protected static void setAlarm(Context context, int refresh_rate) {
+	protected static void setAlarm(Context context, int refresh_rate, int sensorIndex) {
 		Intent startService = new Intent(context, SensorLoggerService.class);
-		PendingIntent pendingIntent = PendingIntent.getService(context, 0, startService, PendingIntent.FLAG_CANCEL_CURRENT);
+        startService.putExtra("sensorIndex", sensorIndex);
+		PendingIntent pendingIntent = PendingIntent.getService(context, 0, startService, PendingIntent.FLAG_ONE_SHOT);
 		((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), refresh_rate, pendingIntent);
 		
 		@SuppressWarnings("deprecation") // We don't want target only API 16...
@@ -47,9 +49,10 @@ public final class AlarmHelper {
 		((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(ACTIVE_NOTIFICATION_ID, notification);
 	}
 	
-	protected static void cancelAlarm(Context context) {
+	protected static void cancelAlarm(Context context, int sensorIndex) {
 		Intent startService = new Intent(context, SensorLoggerService.class);
-		PendingIntent pendingIntent = PendingIntent.getService(context, 0, startService, PendingIntent.FLAG_CANCEL_CURRENT);
+        startService.putExtra("sensorIndex", sensorIndex);
+		PendingIntent pendingIntent = PendingIntent.getService(context, 0, startService, PendingIntent.FLAG_ONE_SHOT);
 		((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(pendingIntent);
 		
 		((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(ACTIVE_NOTIFICATION_ID);

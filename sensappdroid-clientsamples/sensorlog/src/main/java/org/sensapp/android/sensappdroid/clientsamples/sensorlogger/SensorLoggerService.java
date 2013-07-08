@@ -23,7 +23,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import org.sensapp.android.sensappdroid.api.SensAppHelper;
@@ -40,158 +42,135 @@ public class SensorLoggerService extends Service implements SensorEventListener{
 
 	private static final String TAG = SensorLoggerService.class.getSimpleName();
 
-    static SensorManager sensorManager = null;
+    /*static */SensorManager sensorManager = null;
     static List<AbstractSensor> sensors;
+    private AbstractSensor sensor = null;
+    private int sensorIndex;
+    private Runnable alarmLauncher;
+    private Handler alarmHandler = new Handler();
+    private Boolean notSent = true;
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
-        //Log.d("coucou", "create");
-        if(sensors == null || sensors.isEmpty()){
+    @Override
+    public int onStartCommand (Intent intent, int flags, int startId){
+        sensorIndex = intent.getExtras().getInt("sensorIndex");
+        if(sensors != null)
+            sensor = sensors.get(sensorIndex);
+
+        if(sensor==null || !sensor.isListened())
             stopSelf();
-        }
-		if (SensAppHelper.isSensAppInstalled(getApplicationContext())) {
-            // Get all the sensors of the Android.
-            if(sensorManager == null)
-                sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-            initSensors();
-            if(sensors != null){
-                for(AbstractSensor as : sensors){
-                    if(as.isListened()){
-                        if(as.getClass() != AndroidSensor.class /*&& (System.currentTimeMillis() - as.getLastMeasure() > as.getMeasureTime())*/) {
-                            as.setData(this);
-                            as.setMeasured();            //at least one measure
-                            as.setFreshMeasure(true);    //a new measure has been made
-                            insertMeasures();           //put it into local database
-                            as.setLastMeasure();         //refresh time of the last measure
-                            as.setFreshMeasure(false);   //no more last measure
-                            /*if(allSensorsMeasured()) {
-                                unsetSensorListening();
-                            } */
+        else{
+            sensor.setMeasured(false);
+            alarmLauncher = new Runnable() {
+                @Override
+                public void run() {
+                    AlarmHelper.setAlarm(getApplicationContext(), sensor.getMeasureTime(), sensorIndex);
+                }
+            };
 
+            if (SensAppHelper.isSensAppInstalled(getApplicationContext())) {
+                // Get all the sensors of the Android.
+                if(sensorManager == null)
+                    sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+                if(sensor != null && sensor.isListened()){
+                    registerAndListenSensor();
+                    if(sensor.getClass() != AndroidSensor.class){
+                        sensor.setData(this);
+                        sensor.setMeasured(true);
+                        sensor.insertMeasure(getApplicationContext());
+
+                        if(sensor.isListened() && notSent){
+                            notSent = false;
+                            alarmHandler.postDelayed(alarmLauncher, sensor.getMeasureTime());
                         }
+                        stopSelf();
                     }
                 }
-            }
-            stopSelf();
-            //unsetSensorListening();
-            //Log.d("coucou", "closed");
-		} else {
-            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-            editor.putBoolean(SensorActivity.SERVICE_RUNNING, false).commit();
-			AlarmHelper.cancelAlarm(getApplicationContext());
-			//Log.e(TAG, "SensApp has been uninstalled");
-		}
-
-	}
-
-    private void initSensors(){
-        if(noSensorListened()){
-            stopSelf();
-        }
-
-        if(sensors != null){
-            for(AbstractSensor s: sensors){
-                try{
-                    if(s.isListened())
-                        sensorManager.registerListener(this, s.getSensor(), SensorManager.SENSOR_DELAY_UI);
-                    else
-                        sensorManager.unregisterListener(this, s.getSensor());
-
-
-                    Uri sensorUri = s.registerInSensApp(getApplicationContext(), R.drawable.ic_launcher);
-                    /*if (sensorUri == null) {
-                        // The sensor is already registered.
-                        Log.w(TAG, s.getName() + " is already registered");
-                    } else {
-                        // The sensor is newly inserted.
-                        Log.i(TAG, s.getName() + " available at " + sensorUri);
-                    } */
-                } catch (IllegalArgumentException e) {
-                    //Log.e(TAG, e.getMessage());
-                    e.printStackTrace();
-                }
+            } else {
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                editor.putBoolean(SensorActivity.SERVICE_RUNNING, false).commit();
+                AlarmHelper.cancelAlarm(getApplicationContext());
+                //Log.e(TAG, "SensApp has been uninstalled");
             }
         }
+        return 0;
+    }
+
+    private void registerAndListenSensor(){
+        sensor.registerInSensApp(getApplicationContext(), R.drawable.ic_launcher);
+        if(sensor.isListened() && sensor.getClass() == AndroidSensor.class)
+            sensorManager.registerListener(this, sensor.getSensor(), SensorManager.SENSOR_DELAY_UI);
     }
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        AbstractSensor s = getSensorByType(sensorEvent.sensor.getType());
-        if(s != null){
-            if(s.isThreeDataSensor())
-                s.setData(this, sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
-            else
-                s.setData(this, sensorEvent.values[0]);
+        final AbstractSensor as = getSensorBySensor(sensorEvent.sensor);
 
-            if(s.getLastMeasure() == 0)
-                s.setLastMeasure();
+        if(sensorEvent.sensor == sensor.getSensor() && (System.currentTimeMillis() - sensor.getLastMeasure()) > sensor.getMeasureTime()){
+            Log.d("coucou", " " + sensor.getName());
 
-            if((s.getLastMeasure() != 0) && (System.currentTimeMillis() - s.getLastMeasure() > s.getMeasureTime())){
-                s.setMeasured();
-                s.setFreshMeasure(true);
-                insertMeasures();
-                s.setLastMeasure();
-                s.setFreshMeasure(false);
-                /*if(allSensorsMeasured()) {
-                    unsetSensorListening();
-                } */
-                sensorManager.unregisterListener(this, s.getSensor());
+            if(sensor != null && sensor.isListened()){
+                if(sensor.isThreeDataSensor())
+                    sensor.setData(this, sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
+                else
+                    sensor.setData(this, sensorEvent.values[0]);
+
+                sensor.setMeasured(true);
+                sensor.insertMeasure(getApplicationContext());
+                sensor.setLastMeasure();
             }
-        }
-        stopSelf();
-        //Log.d("coucou", "closed");
-    }
 
-    private void unsetSensorListening(){
-        sensorManager.unregisterListener(this);
-    }
-
-    private String listSensor() {
-
-        StringBuffer sensorDesc = new StringBuffer();
-        List<String> data = new ArrayList<String>();
-        for (AbstractSensor AS : sensors) {
-            sensorDesc.append("New sensor detected : \r\n");
-            sensorDesc.append("\tName: " + AS.getSensor().getName() + "\r\n");
-            sensorDesc.append("\tType: " + AS.getType() + "\r\n\r\n");
-            data.add(sensorDesc.toString());
-
-            sensorDesc.delete(0, sensorDesc.length()-1);
+            if(sensor.isListened() && notSent){
+                notSent = false;
+                alarmHandler.postDelayed(alarmLauncher, sensor.getMeasureTime());
+                sensorManager.unregisterListener(this, sensor.getSensor());
+            }
+            stopSelf();
         }
 
-        return data.toString();
-    }
+        if((System.currentTimeMillis() - as.getLastMeasure()) > as.getMeasureTime()){
+            Log.d("coucou", "2 " + as.getName());
 
-	private void insertMeasures() {
-		for(AbstractSensor s: sensors){
-            s.insertMeasure(this);
+            if(as != null && as.isListened()){
+                if(as.isThreeDataSensor())
+                    as.setData(this, sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
+                else
+                    as.setData(this, sensorEvent.values[0]);
+
+                as.setMeasured(true);
+                as.insertMeasure(getApplicationContext());
+                as.setLastMeasure();
+            }
+
+            if(as.isListened()){
+                alarmLauncher = new Runnable() {
+                    @Override
+                    public void run() {
+                        AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime(), sensors.indexOf(as));
+                    }
+                };
+                alarmHandler.postDelayed(alarmLauncher, as.getMeasureTime());
+                sensorManager.unregisterListener(this, as.getSensor());
+            }
+            stopSelf();
         }
-	}
+    }
 
 	@Override
 	public IBinder onBind(Intent arg0) {
 		return null;
 	}
 
-    private String listData(){
-        StringBuffer data = new StringBuffer();
-        for(AbstractSensor s : sensors){
-            data.append(s.getData());
-        }
-        return data.toString();
-    }
-
-    private AbstractSensor getSensorByType(int type){
-        for(AbstractSensor s : sensors)
-            if(s.getSensor().getType() == type)
-                return s;
-        return null;
-    }
-
     static public AbstractSensor getSensorByName(String name){
         for(AbstractSensor s: sensors){
             if(s.getName().equals(name))
+                return s;
+        }
+        return null;
+    }
+
+    static public AbstractSensor getSensorBySensor(Sensor sensor){
+        for(AbstractSensor s: sensors){
+            if(s.getSensor() == sensor)
                 return s;
         }
         return null;
@@ -203,14 +182,6 @@ public class SensorLoggerService extends Service implements SensorEventListener{
 
     static public void initSensorArray(){
         sensors = new ArrayList<AbstractSensor>();
-    }
-
-    private boolean allSensorsMeasured(){
-        for(AbstractSensor s: sensors){
-            if(!s.isMeasured() && s.isListened())
-                return false;
-        }
-        return true;
     }
 
     static public List<AbstractSensor> getSensors(){

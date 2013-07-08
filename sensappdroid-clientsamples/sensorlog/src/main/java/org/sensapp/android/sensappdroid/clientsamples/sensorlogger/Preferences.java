@@ -82,8 +82,8 @@ public class Preferences extends PreferenceActivity {
                         AbstractSensor toChange = SensorLoggerService.getSensorByName((String) preference.getTitle());
                         toChange.setRefreshRate(Integer.parseInt((String) newValue));
 
-                        AlarmHelper.cancelAlarm(getActivity().getApplicationContext());
-                        AlarmHelper.setAlarm(getActivity().getApplicationContext(), toChange.getMeasureTime());
+                        AlarmHelper.cancelAlarm(getActivity().getApplicationContext(), SensorLoggerService.sensors.indexOf(toChange));
+                        AlarmHelper.setAlarm(getActivity().getApplicationContext(), toChange.getMeasureTime(), SensorLoggerService.sensors.indexOf(toChange));
 
                         SharedPreferences.Editor editor;
                         editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();

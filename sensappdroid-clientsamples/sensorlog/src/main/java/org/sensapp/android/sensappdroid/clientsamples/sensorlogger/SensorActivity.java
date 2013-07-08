@@ -52,7 +52,9 @@ public class SensorActivity extends Activity{
         TextView title = (TextView)findViewById(R.id.app_title);
         title.setText(R.string.app_title);
 
-        SensorLoggerService.initSensorArray();
+        SensorLoggerTask.initSensorArray();
+
+        compositeName = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName);
 
         final LinearLayout l = (LinearLayout) findViewById(R.id.general_view);
         //Add all the Android sensors
@@ -72,7 +74,7 @@ public class SensorActivity extends Activity{
     private void addAbstractSensor(AbstractSensor as, LinearLayout l){
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         as.setRefreshRate(sp.getInt(as.getName(), as.getDefaultRate()));
-        SensorLoggerService.addSensor(as);
+        SensorLoggerTask.addSensor(as);
         final Button b = new Button(this);
         final ImageView image = new ImageView(this);
         LinearLayout line = new LinearLayout(this);
@@ -121,8 +123,10 @@ public class SensorActivity extends Activity{
         l.addView(separator);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
-        if(isPrefListenedTrue)
-            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime());
+        if(isPrefListenedTrue){
+            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime(), SensorLoggerTask.sensors.indexOf(as));
+            sp.edit().putBoolean(SERVICE_RUNNING, true).commit();
+        }
     }
 
     private void initButton(final Button b, final AbstractSensor as, final ImageView image){
@@ -173,24 +177,26 @@ public class SensorActivity extends Activity{
             b.setText("Start logging " + as.getName());
             image.setImageResource(R.drawable.button_round_red);
 
-            if(SensorLoggerService.noSensorListened() && preferences.getBoolean(SERVICE_RUNNING, false)){
+            if(SensorLoggerTask.noSensorListened() && preferences.getBoolean(SERVICE_RUNNING, false)){
                 // Service is running so it must stop.
                 // Update the preference.
                 preferences.edit().putBoolean(SERVICE_RUNNING, false).commit();
                 // Request for disable, cancel the alarm.
-                AlarmHelper.cancelAlarm(getApplicationContext());
             }
+            AlarmHelper.cancelAlarm(getApplicationContext(), SensorLoggerTask.sensors.indexOf(as));
         } else {
             as.setListened(true);
             b.setText("Stop logging " + as.getName());
             image.setImageResource(R.drawable.button_round_green);
 
+
             if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
                 // Update the preference. Service is now running.
                 preferences.edit().putBoolean(SERVICE_RUNNING, true).commit();
                 // Schedule a repeating alarm to start the service, which stops itself.
-                AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime());
+
             }
+            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime(), SensorLoggerTask.sensors.indexOf(as));
         }
         preferences.edit().putBoolean(as.getFullName(), as.isListened()).commit();
     }
