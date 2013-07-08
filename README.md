@@ -1,7 +1,7 @@
-SensorLog: Sensapp Android Application Client
+SensorLog
 ============================
 
-The SensorLog android application is an example of what clients can do to log data into SensApp android application.
+The SensorLog android application is a client for SensApp android Application. It is an example of what clients can do to log data into SensApp android application.
 This client can find every sensors (referenced like this by Android) contained in the android host system. These sensors can be logged, or not by a simple click on the row attached.
 There is also some other "sensors" implemented which show that every kind of data can be logged using this client by implementing a simple class file.
 
