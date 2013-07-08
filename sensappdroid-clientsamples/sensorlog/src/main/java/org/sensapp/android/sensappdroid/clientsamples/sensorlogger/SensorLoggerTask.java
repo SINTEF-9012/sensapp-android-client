@@ -57,6 +57,24 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
         }
     }
 
+    @Override
+    public void run() {
+        //Run by the task, this is the main of this task.
+
+        if (SensAppHelper.isSensAppInstalled(context)) {
+            if(sensors != null && sensor != null){
+                registerAndListenSensor();
+                if(sensor.getClass() != AndroidSensor.class && (System.currentTimeMillis() - sensor.getLastMeasure()) > sensor.getMeasureTime()){
+                    sensor.setData(context);
+                    sensor.insertMeasure(context);
+                    sensor.setLastMeasure(); //refresh time of the last measure
+                }
+            }
+        } else {
+            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+            editor.putBoolean(SensorActivity.SERVICE_RUNNING, false).commit();
+        }
+    }
 
     private void registerAndListenSensor(){
         if(sensorManager == null){
@@ -71,8 +89,9 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
+        //Run when an AndroidSensor is listened and has made a nex measure.
+
         if(sensor != null && (System.currentTimeMillis() - sensor.getLastMeasure()) > sensor.getMeasureTime()){
-            Log.d("coucou", sensor.getName());
             if(sensor.isThreeDataSensor())
                 sensor.setData(context, sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
             else
@@ -126,23 +145,5 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
-    }
-
-    @Override
-    public void run() {
-        if (SensAppHelper.isSensAppInstalled(context)) {
-            if(sensors != null && sensor != null){
-                registerAndListenSensor();
-                if(sensor.getClass() != AndroidSensor.class && (System.currentTimeMillis() - sensor.getLastMeasure()) > sensor.getMeasureTime()){
-                    Log.d("coucou", sensor.getName());
-                    sensor.setData(context);
-                    sensor.insertMeasure(context);
-                    sensor.setLastMeasure(); //refresh time of the last measure
-                }
-            }
-        } else {
-            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-            editor.putBoolean(SensorActivity.SERVICE_RUNNING, false).commit();
-        }
     }
 }

@@ -82,10 +82,11 @@ public class Preferences extends PreferenceActivity {
                         }
                         AbstractSensor toChange = SensorLoggerTask.getSensorByName((String) preference.getTitle());
                         toChange.setRefreshRate(Integer.parseInt((String) newValue));
-                        Log.d("coucou", "pref " + toChange.getName());
 
-                        AlarmHelper.cancelAlarm(getActivity().getApplicationContext(), toChange);
-                        AlarmHelper.setAlarm(getActivity().getApplicationContext(), Integer.parseInt((String) newValue), toChange);
+                        if(toChange.isListened()){
+                            AlarmHelper.cancelAlarm(getActivity().getApplicationContext(), toChange);
+                            AlarmHelper.setAlarm(getActivity().getApplicationContext(), Integer.parseInt((String) newValue), toChange);
+                        }
 
                         SharedPreferences.Editor editor;
                         editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
