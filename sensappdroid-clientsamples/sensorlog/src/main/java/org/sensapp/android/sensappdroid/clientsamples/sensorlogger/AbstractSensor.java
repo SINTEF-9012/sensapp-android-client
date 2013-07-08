@@ -80,7 +80,7 @@ public abstract class AbstractSensor {
      */
     public void insertMeasure(Context context){
         try {
-            if(isFreshMeasure()){
+            //if(isFreshMeasure()){
                 Uri measureUri;
                 if(isOneDataSensor()){
                     measureUri = SensAppHelper.insertMeasure(context, getFullName(), data[0]);
@@ -94,7 +94,7 @@ public abstract class AbstractSensor {
                     measureUri = SensAppHelper.insertMeasure(context, getFullName()+"Z", data[2]);
                     //Log.i(TAG, "New measure (" + data[2] + ") available at " + measureUri);
                 }
-            }
+           // }
         } catch (IllegalArgumentException e) {
             //Log.e(TAG, e.getMessage());
             e.printStackTrace();
@@ -140,8 +140,8 @@ public abstract class AbstractSensor {
         return freshMeasure;
     }
 
-    public void setMeasured(){
-        measured = true;
+    public void setMeasured(Boolean set){
+        measured = set;
     }
 
     public boolean isMeasured(){

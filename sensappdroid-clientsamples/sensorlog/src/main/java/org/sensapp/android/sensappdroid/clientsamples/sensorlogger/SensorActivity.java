@@ -54,6 +54,8 @@ public class SensorActivity extends Activity{
 
         SensorLoggerService.initSensorArray();
 
+        compositeName = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName);
+
         final LinearLayout l = (LinearLayout) findViewById(R.id.general_view);
         //Add all the Android sensors
         SensorManager mManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -121,8 +123,10 @@ public class SensorActivity extends Activity{
         l.addView(separator);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
-        if(isPrefListenedTrue)
-            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime());
+        if(isPrefListenedTrue){
+            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime(), SensorLoggerService.sensors.indexOf(as));
+            sp.edit().putBoolean(SERVICE_RUNNING, true).commit();
+        }
     }
 
     private void initButton(final Button b, final AbstractSensor as, final ImageView image){
@@ -185,12 +189,14 @@ public class SensorActivity extends Activity{
             b.setText("Stop logging " + as.getName());
             image.setImageResource(R.drawable.button_round_green);
 
+
             if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
                 // Update the preference. Service is now running.
                 preferences.edit().putBoolean(SERVICE_RUNNING, true).commit();
                 // Schedule a repeating alarm to start the service, which stops itself.
-                AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime());
+
             }
+            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime(), SensorLoggerService.sensors.indexOf(as));
         }
         preferences.edit().putBoolean(as.getFullName(), as.isListened()).commit();
     }
