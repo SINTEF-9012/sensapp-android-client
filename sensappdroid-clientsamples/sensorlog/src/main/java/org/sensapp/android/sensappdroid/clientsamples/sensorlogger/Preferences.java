@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.preference.*;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.text.method.DigitsKeyListener;
+import android.util.Log;
 import org.sensapp.android.sensappdroid.api.SensAppHelper;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public class Preferences extends PreferenceActivity {
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.xml.preferences);
-            List<AbstractSensor> sensors = SensorLoggerService.getSensors();
+            List<AbstractSensor> sensors = SensorLoggerTask.getSensors();
             final EditTextPreference compositeName = (EditTextPreference) findPreference(getString(R.string.pref_compositename_key));
             final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
 
@@ -52,8 +53,8 @@ public class Preferences extends PreferenceActivity {
 
                     if(name!=lastName){
                         SensorActivity.compositeName = name;
-                        if(SensorLoggerService.sensors != null){
-                            for(AbstractSensor s : SensorLoggerService.sensors)
+                        if(SensorLoggerTask.sensors != null){
+                            for(AbstractSensor s : SensorLoggerTask.sensors)
                                 s.setCompositeName(name);
                         }
                     }
@@ -79,17 +80,18 @@ public class Preferences extends PreferenceActivity {
                         if (((String) newValue).isEmpty()) {
                             return false;
                         }
-                        AbstractSensor toChange = SensorLoggerService.getSensorByName((String) preference.getTitle());
+                        AbstractSensor toChange = SensorLoggerTask.getSensorByName((String) preference.getTitle());
                         toChange.setRefreshRate(Integer.parseInt((String) newValue));
+                        Log.d("coucou", "pref " + toChange.getName());
 
-                        AlarmHelper.cancelAlarm(getActivity().getApplicationContext(), SensorLoggerService.sensors.indexOf(toChange));
-                        AlarmHelper.setAlarm(getActivity().getApplicationContext(), toChange.getMeasureTime(), SensorLoggerService.sensors.indexOf(toChange));
+                        AlarmHelper.cancelAlarm(getActivity().getApplicationContext(), toChange);
+                        AlarmHelper.setAlarm(getActivity().getApplicationContext(), Integer.parseInt((String) newValue), toChange);
 
                         SharedPreferences.Editor editor;
                         editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-                        editor.putInt(toChange.getName(), toChange.getMeasureTime());
+                        editor.putInt(toChange.getName(), Integer.parseInt((String) newValue));
                         editor.commit();
-                        preference.setSummary(((Integer) toChange.getMeasureTime()).toString());
+                        preference.setSummary(((Integer) Integer.parseInt((String) newValue)).toString());
                         return true;
                     }
                 });

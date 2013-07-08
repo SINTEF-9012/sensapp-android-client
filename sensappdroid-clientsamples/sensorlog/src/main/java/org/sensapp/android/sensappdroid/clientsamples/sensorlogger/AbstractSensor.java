@@ -80,20 +80,18 @@ public abstract class AbstractSensor {
      */
     public void insertMeasure(Context context){
         try {
-            if(isFreshMeasure()){
-                Uri measureUri;
-                if(isOneDataSensor()){
-                    measureUri = SensAppHelper.insertMeasure(context, getFullName(), data[0]);
-                    //.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
-                }
-                else if(isThreeDataSensor()){
-                    measureUri = SensAppHelper.insertMeasure(context, getFullName()+"X", data[0]);
-                    //Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
-                    measureUri = SensAppHelper.insertMeasure(context, getFullName()+"Y", data[1]);
-                    //Log.i(TAG, "New measure (" + data[1] + ") available at " + measureUri);
-                    measureUri = SensAppHelper.insertMeasure(context, getFullName()+"Z", data[2]);
-                    //Log.i(TAG, "New measure (" + data[2] + ") available at " + measureUri);
-                }
+            Uri measureUri;
+            if(isOneDataSensor()){
+                measureUri = SensAppHelper.insertMeasure(context, getFullName(), data[0]);
+                //.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
+            }
+            else if(isThreeDataSensor()){
+                measureUri = SensAppHelper.insertMeasure(context, getFullName()+"X", data[0]);
+                //Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
+                measureUri = SensAppHelper.insertMeasure(context, getFullName()+"Y", data[1]);
+                //Log.i(TAG, "New measure (" + data[1] + ") available at " + measureUri);
+                measureUri = SensAppHelper.insertMeasure(context, getFullName()+"Z", data[2]);
+                //Log.i(TAG, "New measure (" + data[2] + ") available at " + measureUri);
             }
         } catch (IllegalArgumentException e) {
             //Log.e(TAG, e.getMessage());

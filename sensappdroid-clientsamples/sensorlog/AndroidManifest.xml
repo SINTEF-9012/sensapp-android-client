@@ -46,7 +46,7 @@
                 android:launchMode="singleTask">
         </activity>
         <service
-                android:name=".SensorLoggerService">
+                android:name=".SensorManagerService">
         </service>
     </application>
 

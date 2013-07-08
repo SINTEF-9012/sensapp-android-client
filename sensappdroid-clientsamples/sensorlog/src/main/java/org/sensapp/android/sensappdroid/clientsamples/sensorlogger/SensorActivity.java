@@ -47,6 +47,7 @@ public class SensorActivity extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         //Debug.startMethodTracing("SensorActivity");
         setContentView(R.layout.activity_main);
         TextView title = (TextView)findViewById(R.id.app_title);
@@ -124,7 +125,7 @@ public class SensorActivity extends Activity{
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
         if(isPrefListenedTrue){
-            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime(), SensorLoggerTask.sensors.indexOf(as));
+            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime(), as);
             sp.edit().putBoolean(SERVICE_RUNNING, true).commit();
         }
     }
@@ -183,7 +184,7 @@ public class SensorActivity extends Activity{
                 preferences.edit().putBoolean(SERVICE_RUNNING, false).commit();
                 // Request for disable, cancel the alarm.
             }
-            AlarmHelper.cancelAlarm(getApplicationContext(), SensorLoggerTask.sensors.indexOf(as));
+            AlarmHelper.cancelAlarm(getApplicationContext(), as);
         } else {
             as.setListened(true);
             b.setText("Stop logging " + as.getName());
@@ -196,7 +197,7 @@ public class SensorActivity extends Activity{
                 // Schedule a repeating alarm to start the service, which stops itself.
 
             }
-            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime(), SensorLoggerTask.sensors.indexOf(as));
+            AlarmHelper.setAlarm(getApplicationContext(), as.getMeasureTime(), as);
         }
         preferences.edit().putBoolean(as.getFullName(), as.isListened()).commit();
     }

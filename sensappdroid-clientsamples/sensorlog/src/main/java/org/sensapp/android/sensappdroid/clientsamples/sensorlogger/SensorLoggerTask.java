@@ -47,56 +47,40 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
     static SensorManager sensorManager = null;
     static List<AbstractSensor> sensors;
     private AbstractSensor sensor = null;
-    private int sensorIndex;
     static Context context;
 
-    private class MyService extends Service{
-
-        @Override
-        public void onCreate(){
-            sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        }
-
-        @Override
-        public IBinder onBind(Intent intent) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-    }
-
-
-    SensorLoggerTask(AbstractSensor as, int asIndex, Context context){
+    SensorLoggerTask(AbstractSensor as,Context context){
         sensor = as;
-        sensorIndex = asIndex;
         this.context = context;
-        Intent startService = new Intent(context, MyService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(context, 0, startService, PendingIntent.FLAG_ONE_SHOT);
-        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), sensor.getMeasureTime(), pendingIntent);
+        if(sensorManager == null){
+            initSensorManager();
+        }
     }
 
 
     private void registerAndListenSensor(){
-        sensor.registerInSensApp(context, R.drawable.ic_launcher);
-        if(sensor.isListened() && sensor.getClass() == AndroidSensor.class)
-            sensorManager.registerListener(this, sensor.getSensor(), SensorManager.SENSOR_DELAY_UI);
-        else
-            sensorManager.unregisterListener(this, sensor.getSensor());
+        if(sensorManager == null){
+            initSensorManager();
+        }
+        else{
+            sensor.registerInSensApp(context, R.drawable.ic_launcher);
+            if(sensor.isListened() && sensor.getClass() == AndroidSensor.class)
+                sensorManager.registerListener(this, sensor.getSensor(), SensorManager.SENSOR_DELAY_UI);
+        }
     }
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        if(sensor != null){
+        if(sensor != null && (System.currentTimeMillis() - sensor.getLastMeasure()) > sensor.getMeasureTime()){
+            Log.d("coucou", sensor.getName());
             if(sensor.isThreeDataSensor())
                 sensor.setData(context, sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
             else
                 sensor.setData(context, sensorEvent.values[0]);
 
-            sensor.setMeasured();
-            sensor.setFreshMeasure(true);
             sensor.insertMeasure(context);
             sensor.setLastMeasure();
-            sensor.setFreshMeasure(false);
             sensorManager.unregisterListener(this, sensor.getSensor());
-            this.cancel();
         }
     }
 
@@ -112,6 +96,10 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
         return sensors;
     }
 
+    public AbstractSensor getSensor(){
+        return this.sensor;
+    }
+
     static public boolean noSensorListened(){
         if(sensors != null){
             for(AbstractSensor s : sensors){
@@ -122,6 +110,20 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
         return true;
     }
 
+    static public AbstractSensor getSensorByName(String name){
+        for(AbstractSensor s: sensors){
+            if(s.getName().equals(name))
+                return s;
+        }
+        return null;
+    }
+
+    void initSensorManager(){
+        Intent startService = new Intent(context, SensorManagerService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(context, 0, startService, PendingIntent.FLAG_ONE_SHOT);
+        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent);
+    }
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
     }
@@ -130,18 +132,13 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
     public void run() {
         if (SensAppHelper.isSensAppInstalled(context)) {
             if(sensors != null && sensor != null){
-                if(sensor.getClass() != AndroidSensor.class){
+                registerAndListenSensor();
+                if(sensor.getClass() != AndroidSensor.class && (System.currentTimeMillis() - sensor.getLastMeasure()) > sensor.getMeasureTime()){
+                    Log.d("coucou", sensor.getName());
                     sensor.setData(context);
-                    sensor.setMeasured();            //at least one measure
-                    sensor.setFreshMeasure(true);    //a new measure has been made
-                    //insertMeasures();           //put it into local database
                     sensor.insertMeasure(context);
                     sensor.setLastMeasure(); //refresh time of the last measure
-                    sensor.setFreshMeasure(false);
-                    this.cancel();
                 }
-                else
-                    registerAndListenSensor();
             }
         } else {
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
