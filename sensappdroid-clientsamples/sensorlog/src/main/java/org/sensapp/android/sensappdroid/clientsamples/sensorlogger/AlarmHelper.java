@@ -35,16 +35,13 @@ public final class AlarmHelper {
 	
 	private static final int ACTIVE_NOTIFICATION_ID = 79290;
     private static final String TAG = AlarmHelper.class.getSimpleName();
-	private static final Timer timer = new Timer();
+	private static Timer timer = null;
     private static List<SensorLoggerTask> taskList= new ArrayList<SensorLoggerTask>();
 	private AlarmHelper() {}
 	
 	protected static void setAlarm(Context context, int refresh_rate, AbstractSensor as) {
-		/*Intent startService = new Intent(context, SensorManagerService.class);
-        //startService.putExtra("sensorIndex", sensorIndex);
-		PendingIntent pendingIntent = PendingIntent.getService(context, 0, startService, PendingIntent.FLAG_ONE_SHOT);
-		((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent);
-        context.startService(startService);*/
+        if(timer == null)
+            timer = new Timer();
 
         SensorLoggerTask newTask = new SensorLoggerTask(as, context);
         taskList.add(newTask);
@@ -67,8 +64,11 @@ public final class AlarmHelper {
             cancelledTask.cancel();
         taskList.remove(cancelledTask);
 
-        if(taskList.isEmpty())
+        if(taskList.isEmpty()){
+            timer.cancel();
+            timer = null;
 		    ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(ACTIVE_NOTIFICATION_ID);
+        }
 	}
 
     private static SensorLoggerTask getTaskByAbstractSensor(AbstractSensor as){
