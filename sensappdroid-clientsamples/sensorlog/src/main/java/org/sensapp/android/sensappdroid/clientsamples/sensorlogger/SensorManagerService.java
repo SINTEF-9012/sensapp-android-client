@@ -27,10 +27,12 @@ public class SensorManagerService extends Service {
     private static final String TAG = SensorManagerService.class.getSimpleName();
     private static Timer timer = null;
     private static List<SensorLoggerTask> taskList= new ArrayList<SensorLoggerTask>();
+    private static Intent myIntent;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //Make the service run infinitely
+        myIntent = intent;
         return START_STICKY;
     }
 
@@ -95,11 +97,17 @@ public class SensorManagerService extends Service {
         return null;
     }
 
+    static public Intent getIntent(){
+        return myIntent;
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        timer.cancel();
-        timer = null;
+        if(timer != null){
+            timer.cancel();
+            timer = null;
+        }
     }
 
 }

@@ -71,6 +71,9 @@ public class SensorActivity extends Activity{
             case R.id.preferences:
                 startActivity(new Intent(getApplicationContext(), Preferences.class));
                 return true;
+            case R.id.exit:
+                exitActivity();
+                return true;
         }
         return false;
     }
@@ -145,6 +148,14 @@ public class SensorActivity extends Activity{
             SensorManagerService.setLog(getApplicationContext(), as);
         }
         preferences.edit().putBoolean(as.getFullName(), as.isListened()).commit();
+    }
+
+    private void exitActivity(){
+        for(AbstractSensor as : SensorLoggerTask.sensors)
+            SensorManagerService.cancelLog(getApplicationContext(), as);
+        getApplicationContext().stopService(SensorManagerService.getIntent());
+        this.finish();
+        //this.onDestroy();
     }
 
     @Override
