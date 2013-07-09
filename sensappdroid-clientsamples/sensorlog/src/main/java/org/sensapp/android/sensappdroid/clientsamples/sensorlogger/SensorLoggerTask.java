@@ -1,23 +1,7 @@
-/**
- * Copyright (C) 2012 SINTEF <fabien@fleurey.com>
- *
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/lgpl-3.0.txt
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,10 +9,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.net.Uri;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import org.sensapp.android.sensappdroid.api.SensAppHelper;
 
 import java.util.ArrayList;
@@ -36,7 +17,7 @@ import java.util.List;
 import java.util.TimerTask;
 
 /**
- * @author Fabien Fleurey , Jonathan Nain
+ * @author Jonathan Nain
  * This class presents a minimalist service which use the SensApp android API to log the sensors.
  * It is started by the alarm manager and self stopped as soon every sensor has inserted a new measure.
  */
@@ -49,11 +30,11 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
     private AbstractSensor sensor = null;
     static Context context;
 
-    SensorLoggerTask(AbstractSensor as,Context context){
+    SensorLoggerTask(AbstractSensor as, Context c){
         sensor = as;
-        this.context = context;
+        context = c;
         if(sensorManager == null){
-            initSensorManager();
+            initSensorManager(c);
         }
     }
 
@@ -77,14 +58,9 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
     }
 
     private void registerAndListenSensor(){
-        if(sensorManager == null){
-            initSensorManager();
-        }
-        else{
-            sensor.registerInSensApp(context, R.drawable.ic_launcher);
-            if(sensor.isListened() && sensor.getClass() == AndroidSensor.class)
-                sensorManager.registerListener(this, sensor.getSensor(), SensorManager.SENSOR_DELAY_UI);
-        }
+        sensor.registerInSensApp(context, R.drawable.ic_launcher);
+        if(sensor.isListened() && sensor.getClass() == AndroidSensor.class)
+            sensorManager.registerListener(this, sensor.getSensor(), SensorManager.SENSOR_DELAY_UI);
     }
 
     @Override
@@ -121,16 +97,6 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
         return this.sensor;
     }
 
-    static public boolean noSensorListened(){
-        if(sensors != null){
-            for(AbstractSensor s : sensors){
-                if(s.isListened())
-                    return false;
-            }
-        }
-        return true;
-    }
-
     static public AbstractSensor getSensorByName(String name){
         for(AbstractSensor s: sensors){
             if(s.getName().equals(name))
@@ -139,10 +105,42 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
         return null;
     }
 
-    void initSensorManager(){
-        Intent startService = new Intent(context, SensorManagerService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(context, 0, startService, PendingIntent.FLAG_ONE_SHOT);
-        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent);
+    static public void initSensorManager(Context c){
+        Intent startService = new Intent(c, SensorManagerService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(c, 0, startService, PendingIntent.FLAG_ONE_SHOT);
+        ((AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent);
+    }
+
+    static public void setUpSensors(Context c, SensorManager manager){
+        sensorManager = manager;
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
+        String compositeName = sp.getString(c.getString(R.string.pref_compositename_key), SensorActivity.compositeName);
+
+        if(sensors == null)
+            initSensorArray();
+
+        for(Sensor s: sensorManager.getSensorList(Sensor.TYPE_ALL)){
+            AndroidSensor as = new AndroidSensor(s, compositeName);
+            setUpSensor(as, sp, c);
+        }
+
+        //Add Battery sensor
+        BatterySensor bs = new BatterySensor(compositeName);
+        setUpSensor(bs, sp, c);
+
+        //Add the Free Memory percentage
+        FreeMemorySensor fms = new FreeMemorySensor(compositeName);
+        setUpSensor(fms, sp, c);
+    }
+
+    static private void setUpSensor(AbstractSensor as, SharedPreferences sp, Context c){
+        as.setRefreshRate(sp.getInt(as.getName(), as.getDefaultRate()));
+        as.setListened(sp.getBoolean(as.getFullName(), false));
+        if(!sensors.contains(as))
+            addSensor(as);
+        if(as.isListened())
+            SensorManagerService.setLog(c, as);
     }
 
     @Override

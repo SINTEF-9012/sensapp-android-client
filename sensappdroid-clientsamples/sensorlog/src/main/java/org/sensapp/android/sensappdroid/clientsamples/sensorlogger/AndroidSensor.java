@@ -1,26 +1,7 @@
-/**
- * Copyright (C) 2012 SINTEF <fabien@fleurey.com>
- *
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/lgpl-3.0.txt
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 
 import android.content.Context;
 import android.hardware.Sensor;
-import android.net.Uri;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import org.sensapp.android.sensappdroid.api.SensAppHelper;
 import org.sensapp.android.sensappdroid.api.SensAppUnit;
 
 /**
@@ -39,17 +20,6 @@ public class AndroidSensor extends AbstractSensor{
     private static final String TAG = AndroidSensor.class.getSimpleName();
     final static int DEFAULT_RATE = 500;
 
-    /*final static int DEFAULT_RATE = 500;            //Default rate of the sensor measures in milliseconds
-    private float[] data;                           //Array to stock data
-    private Sensor mSensor;                         //The sensor
-    private String mComposite;                      //The group where the sensor is
-    private float entryLevel = 1;                   //Entry level of the sensor measures
-    private boolean measured = false;               //If the sensor has been measured once
-    private boolean freshMeasure = false;           //If the sensor has new data to post
-    private long lastMeasure=0;                     //The time of the last measure
-    private int refreshRate;                        //The current rate of the sensor measures in milliseconds
-    private boolean listened = false;               //If the sensor is listened or not   */
-
     AndroidSensor(Sensor s, String composite) {
         mSensor = s;
         setEntryLevel();
@@ -57,27 +27,25 @@ public class AndroidSensor extends AbstractSensor{
         mComposite = composite;
     }
 
+    @SuppressWarnings("deprecation") // We don't want target only API 16...
     public boolean isThreeDataSensor(){
-        if(mSensor.getType() == Sensor.TYPE_ACCELEROMETER
+        return (mSensor.getType() == Sensor.TYPE_ACCELEROMETER
                 || mSensor.getType() == Sensor.TYPE_GYROSCOPE
                 || mSensor.getType() == Sensor.TYPE_MAGNETIC_FIELD
                 || mSensor.getType() == Sensor.TYPE_ORIENTATION
                 || mSensor.getType() == Sensor.TYPE_GRAVITY
                 || mSensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION
-                || mSensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
-            return true;
-        return false;
+                || mSensor.getType() == Sensor.TYPE_ROTATION_VECTOR);
     }
 
+    @SuppressWarnings("deprecation") // We don't want target only API 16...
     public boolean isOneDataSensor(){
-        if(mSensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE
+        return (mSensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE
                 || mSensor.getType() == Sensor.TYPE_LIGHT
                 || mSensor.getType() == Sensor.TYPE_PRESSURE
                 || mSensor.getType() == Sensor.TYPE_PROXIMITY
                 || mSensor.getType() == Sensor.TYPE_RELATIVE_HUMIDITY
-                || mSensor.getType() == Sensor.TYPE_TEMPERATURE)
-            return true;
-        return false;
+                || mSensor.getType() == Sensor.TYPE_TEMPERATURE);
     }
 
     private void initData(){
@@ -137,6 +105,7 @@ public class AndroidSensor extends AbstractSensor{
      * Set up the entry level for each sensor.
      * Here are just some examples based on our experiment tablet.
      */
+    @SuppressWarnings("deprecation") // We don't want target only API 16...
     private void setEntryLevel(){
         switch(mSensor.getType()){
             case Sensor.TYPE_MAGNETIC_FIELD:entryLevel = (float)0.000001;break;          //uTesla to Tesla
@@ -148,12 +117,12 @@ public class AndroidSensor extends AbstractSensor{
     }
 
     public String getData(){
-        StringBuffer out = new StringBuffer();
-        out.append(getSensor().getName()+"\r\n");
-        out.append(data[0]);
+        StringBuilder out = new StringBuilder();
+        out .append(getSensor().getName()+"\r\n")
+            .append(data[0]);
         if(isThreeDataSensor()){
-            out.append(", " + data[1]);
-            out.append(", " + data[2]);
+            out .append(", " + data[1])
+                .append(", " + data[2]);
         }
         out.append("\r\n\r\n");
         return out.toString();
@@ -175,6 +144,7 @@ public class AndroidSensor extends AbstractSensor{
         refreshRate = rate;
     }     */
 
+    @SuppressWarnings("deprecation") // We don't want target only API 16...
     public String getType() {
         String strType;
         switch (mSensor.getType()) {
@@ -190,11 +160,12 @@ public class AndroidSensor extends AbstractSensor{
             case Sensor.TYPE_PROXIMITY:    strType = "TYPE_PROXIMITY";    break;
             case Sensor.TYPE_ROTATION_VECTOR:    strType = "TYPE_ROTATION_VECTOR";break;
             case Sensor.TYPE_TEMPERATURE:strType = "TYPE_TEMPERATURE";break;
-            default:    strType = "TYPE_UNKNOW";break;
+            default:    strType = "TYPE_UNKNOWN";break;
         }
         return strType;
     }
 
+    @SuppressWarnings("deprecation") // We don't want target only API 16...
     public String getName() {
         String strType;
         switch (mSensor.getType()) {
@@ -215,6 +186,7 @@ public class AndroidSensor extends AbstractSensor{
         return strType;
     }
 
+    @SuppressWarnings("deprecation") // We don't want target only API 16...
     public SensAppUnit getUnit() {
         SensAppUnit strType;
         switch (mSensor.getType()) {

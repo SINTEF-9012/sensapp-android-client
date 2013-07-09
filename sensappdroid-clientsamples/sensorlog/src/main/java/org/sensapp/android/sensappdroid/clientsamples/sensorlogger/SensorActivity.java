@@ -1,32 +1,11 @@
-/**
- * Copyright (C) 2012 SINTEF <fabien@fleurey.com>
- *
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/lgpl-3.0.txt
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Build;
-import android.os.Debug;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.*;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -51,9 +30,7 @@ public class SensorActivity extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent startService = new Intent(getApplicationContext(), SensorManagerService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0, startService, PendingIntent.FLAG_ONE_SHOT);
-        ((AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent);
+        SensorLoggerTask.initSensorManager(getApplicationContext());
 
         //Debug.startMethodTracing("SensorActivity");
         setContentView(R.layout.activity_main);
@@ -64,33 +41,18 @@ public class SensorActivity extends Activity{
 
         compositeName = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName);
 
-
         final LinearLayout l = (LinearLayout) findViewById(R.id.general_view);
 
-        //Add all the Android sensors
-        SensorManager mManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        for(Sensor s: mManager.getSensorList(Sensor.TYPE_ALL)){
-            AndroidSensor as = new AndroidSensor(s, compositeName);
-            addAbstractSensor(as, l);
-        }
-        //Add the battery
-        BatterySensor bs = new BatterySensor(compositeName);
-        addAbstractSensor(bs, l);
-        //Add the Free Memory percentage
-        FreeMemorySensor fms = new FreeMemorySensor(compositeName);
-        addAbstractSensor(fms, l);
+        SensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE));
+        for(AbstractSensor s: SensorLoggerTask.sensors)
+            addAbstractSensor(s, l);
     }
 
     private void addAbstractSensor(AbstractSensor as, LinearLayout l){
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        as.setRefreshRate(sp.getInt(as.getName(), as.getDefaultRate()));
-        SensorLoggerTask.addSensor(as);
         final Button b = new Button(this);
         final ImageView image = new ImageView(this);
         LinearLayout line = new LinearLayout(this);
         LinearLayout forImage = new LinearLayout(this);
-
-        as.setListened(sp.getBoolean(as.getFullName(), false));
 
         initButton(b, as, image);
         initImage(image, l, as);
@@ -131,17 +93,9 @@ public class SensorActivity extends Activity{
         separator.setMinimumWidth(l.getWidth());
         separator.setBackgroundColor(GREY);
         l.addView(separator);
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
-        if(isPrefListenedTrue){
-            SensorManagerService.setLog(getApplicationContext(), as);
-            sp.edit().putBoolean(SERVICE_RUNNING, true).commit();
-        }
     }
 
     private void initButton(final Button b, final AbstractSensor as, final ImageView image){
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
         if(as.isListened())
             b.setText("Stop logging " + as.getName());
         else
@@ -159,8 +113,6 @@ public class SensorActivity extends Activity{
     }
 
     private void initImage(final ImageView img, LinearLayout l, AbstractSensor as){
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isPrefListenedTrue = sp.getBoolean(as.getFullName(), false);
         if(as.isListened())
             img.setImageResource(R.drawable.button_round_green);
         else
@@ -172,8 +124,7 @@ public class SensorActivity extends Activity{
     private void OnClick(Button b, AbstractSensor as, ImageView image){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
-            // If service is not running.
-
+            // If service is not already running.
             // Check if SensApp is installed.
             if (!SensAppHelper.isSensAppInstalled(getApplicationContext())) {
                 // If not suggest to install and return.
@@ -186,26 +137,11 @@ public class SensorActivity extends Activity{
             as.setListened(false);
             b.setText("Start logging " + as.getName());
             image.setImageResource(R.drawable.button_round_red);
-
-            if(SensorLoggerTask.noSensorListened() && preferences.getBoolean(SERVICE_RUNNING, false)){
-                // Service is running so it must stop.
-                // Update the preference.
-                preferences.edit().putBoolean(SERVICE_RUNNING, false).commit();
-                // Request for disable, cancel the alarm.
-            }
             SensorManagerService.cancelLog(getApplicationContext(), as);
         } else {
             as.setListened(true);
             b.setText("Stop logging " + as.getName());
             image.setImageResource(R.drawable.button_round_green);
-
-
-            if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
-                // Update the preference. Service is now running.
-                preferences.edit().putBoolean(SERVICE_RUNNING, true).commit();
-                // Schedule a repeating alarm to start the service, which stops itself.
-
-            }
             SensorManagerService.setLog(getApplicationContext(), as);
         }
         preferences.edit().putBoolean(as.getFullName(), as.isListened()).commit();

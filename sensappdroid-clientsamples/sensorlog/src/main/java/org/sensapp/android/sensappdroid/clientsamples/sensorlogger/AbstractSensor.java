@@ -1,25 +1,9 @@
-/**
- * Copyright (C) 2012 SINTEF <fabien@fleurey.com>
- *
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/lgpl-3.0.txt
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 
 import android.content.Context;
 import android.hardware.Sensor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import org.sensapp.android.sensappdroid.api.SensAppHelper;
 import org.sensapp.android.sensappdroid.api.SensAppUnit;
 
@@ -28,10 +12,8 @@ import org.sensapp.android.sensappdroid.api.SensAppUnit;
  * User: Jonathan
  * Date: 13/06/13
  * Time: 13:40
- * To change this template use File | Settings | File Templates.
  */
 public abstract class AbstractSensor {
-    private static final String TAG = AndroidSensor.class.getSimpleName();
 
     final static int DEFAULT_RATE = 2000;            //Default rate of the sensor measures in milliseconds
     protected float[] data;                           //Array to stock data
@@ -80,18 +62,22 @@ public abstract class AbstractSensor {
      */
     public void insertMeasure(Context context){
         try {
-            Uri measureUri;
+            //Uri measureUri;
             if(isOneDataSensor()){
-                measureUri = SensAppHelper.insertMeasure(context, getFullName(), data[0]);
-                //.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
+                SensAppHelper.insertMeasure(context, getFullName(), data[0]);
+                /*measureUri = SensAppHelper.insertMeasure(context, getFullName(), data[0]);
+                Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);*/
             }
             else if(isThreeDataSensor()){
-                measureUri = SensAppHelper.insertMeasure(context, getFullName()+"X", data[0]);
-                //Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
+                SensAppHelper.insertMeasure(context, getFullName()+"X", data[0]);
+                SensAppHelper.insertMeasure(context, getFullName()+"Y", data[1]);
+                SensAppHelper.insertMeasure(context, getFullName()+"Z", data[2]);
+                /*measureUri = SensAppHelper.insertMeasure(context, getFullName()+"X", data[0]);
+                Log.i(TAG, "New measure (" + data[0] + ") available at " + measureUri);
                 measureUri = SensAppHelper.insertMeasure(context, getFullName()+"Y", data[1]);
-                //Log.i(TAG, "New measure (" + data[1] + ") available at " + measureUri);
+                Log.i(TAG, "New measure (" + data[1] + ") available at " + measureUri);
                 measureUri = SensAppHelper.insertMeasure(context, getFullName()+"Z", data[2]);
-                //Log.i(TAG, "New measure (" + data[2] + ") available at " + measureUri);
+                Log.i(TAG, "New measure (" + data[2] + ") available at " + measureUri);*/
             }
         } catch (IllegalArgumentException e) {
             //Log.e(TAG, e.getMessage());
@@ -100,15 +86,12 @@ public abstract class AbstractSensor {
     }
 
     public void setData(Context context){
-        return;
     }
 
     public void setData(Context context, float x){
-        return;
     }
 
     public void setData(Context context, float x, float y, float z){
-        return;
     }
 
     abstract public boolean isThreeDataSensor();
@@ -172,11 +155,11 @@ public abstract class AbstractSensor {
 
     @Override
     public boolean equals(Object o){
-        if(o.getClass() == this.getClass()){
-            AbstractSensor a = (AbstractSensor) o;
-            return this.getName().equals(a.getName());
-        }
-        else
-            return super.equals(o);
+        return (o instanceof AbstractSensor) && this.getName().equals(((AbstractSensor) o).getName());
+    }
+
+    @Override
+    public int hashCode(){
+       return this.getName().hashCode();
     }
 }

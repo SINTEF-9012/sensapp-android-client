@@ -7,11 +7,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +20,7 @@ import java.util.Timer;
  * User: Jonathan
  * Date: 08/07/13
  * Time: 10:31
- * To change this template use File | Settings | File Templates.
  */
-
 public class SensorManagerService extends Service {
 
     private static final int ACTIVE_NOTIFICATION_ID = 79290;
@@ -34,58 +30,23 @@ public class SensorManagerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        //Make the service run infinitely
         return START_STICKY;
     }
 
     @Override
     public void onCreate(){
         super.onCreate();
-        SensorLoggerTask.sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String compositeName = sp.getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName);
-
-        if(SensorLoggerTask.sensors == null)
-            SensorLoggerTask.initSensorArray();
-
-        for(Sensor s: SensorLoggerTask.sensorManager.getSensorList(Sensor.TYPE_ALL)){
-            AndroidSensor as = new AndroidSensor(s, compositeName);
-            as.setRefreshRate(sp.getInt(as.getName(), as.getDefaultRate()));
-            as.setListened(sp.getBoolean(as.getFullName(), false));
-            if(!SensorLoggerTask.sensors.contains(as))
-                SensorLoggerTask.addSensor(as);
-            if(as.isListened())
-                setLog(getApplicationContext(), as);
-        }
-
-        BatterySensor bs = new BatterySensor(compositeName);
-        bs.setRefreshRate(sp.getInt(bs.getName(), bs.getDefaultRate()));
-        bs.setListened(sp.getBoolean(bs.getFullName(), false));
-        if(!SensorLoggerTask.sensors.contains(bs))
-            SensorLoggerTask.addSensor(bs);
-        if(bs.isListened())
-            setLog(getApplicationContext(), bs);
-        //Add the Free Memory percentage
-        FreeMemorySensor fms = new FreeMemorySensor(compositeName);
-        fms.setRefreshRate(sp.getInt(fms.getName(), fms.getDefaultRate()));
-        fms.setListened(sp.getBoolean(fms.getFullName(), false));
-        if(!SensorLoggerTask.sensors.contains(fms))
-            SensorLoggerTask.addSensor(fms);
-        if(fms.isListened())
-            setLog(getApplicationContext(), fms);
-
-
-        //Log.d("coucou", "sensors " + SensorLoggerTask.sensors.toString());
-        Log.d("coucou", "test " + taskList.toString());
-
+        SensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE));
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     protected static void setLog(Context context, AbstractSensor as) {
+        //if log already active for this sensor
         if(getTaskByAbstractSensor(as) != null)
             return;
 
@@ -112,14 +73,18 @@ public class SensorManagerService extends Service {
 
     protected static void cancelLog(Context context, AbstractSensor as) {
         SensorLoggerTask cancelledTask = getTaskByAbstractSensor(as);
-        if(cancelledTask != null)
-            cancelledTask.cancel();
+        if(cancelledTask == null)
+            return;
+
+        cancelledTask.cancel();
         taskList.remove(cancelledTask);
 
         if(taskList.isEmpty()){
             timer.cancel();
             timer = null;
             ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(ACTIVE_NOTIFICATION_ID);
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+            sp.edit().putBoolean(SensorActivity.SERVICE_RUNNING, false).commit();
         }
     }
 

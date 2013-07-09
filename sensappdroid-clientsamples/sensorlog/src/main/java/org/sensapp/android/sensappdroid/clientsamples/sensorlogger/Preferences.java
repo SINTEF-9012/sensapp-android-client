@@ -1,18 +1,3 @@
-/**
- * Copyright (C) 2012 SINTEF <fabien@fleurey.com>
- *
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/lgpl-3.0.txt
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 
 import android.content.SharedPreferences;
@@ -20,8 +5,6 @@ import android.os.Bundle;
 import android.preference.*;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.text.method.DigitsKeyListener;
-import android.util.Log;
-import org.sensapp.android.sensappdroid.api.SensAppHelper;
 
 import java.util.List;
 
@@ -36,22 +19,25 @@ public class Preferences extends PreferenceActivity {
 			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.xml.preferences);
             List<AbstractSensor> sensors = SensorLoggerTask.getSensors();
-            final EditTextPreference compositeName = (EditTextPreference) findPreference(getString(R.string.pref_compositename_key));
-            final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
 
-            compositeName.setDefaultValue(sp.getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName));
-            compositeName.setSummary(sp.getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName));
+            final String compositeNameKey = getString(R.string.pref_compositename_key);
+            final EditTextPreference compositeName = (EditTextPreference) findPreference(compositeNameKey);
+            final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+            final SharedPreferences.Editor prefEditor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+
+            //Add Composite Name EditText to the list of preferences
+            compositeName.setDefaultValue(sp.getString(compositeNameKey, SensorActivity.compositeName));
+            compositeName.setSummary(sp.getString(compositeNameKey, SensorActivity.compositeName));
             compositeName.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    String lastName = sp.getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName);
+                    String lastName = sp.getString(compositeNameKey, SensorActivity.compositeName);
 
-                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
                     String name = (String)newValue;
-                    editor.putString(getString(R.string.pref_compositename_key), name).commit();
+                    prefEditor.putString(compositeNameKey, name).commit();
                     compositeName.setSummary(name);
 
-                    if(name!=lastName){
+                    if(!name.equals(lastName)){
                         SensorActivity.compositeName = name;
                         if(SensorLoggerTask.sensors != null){
                             for(AbstractSensor s : SensorLoggerTask.sensors)
@@ -63,7 +49,7 @@ public class Preferences extends PreferenceActivity {
                 }
             });
 
-            //Set the sensors into 'preferences'
+            //Add the sensors refresh rate into 'preferences'
             for(AbstractSensor s: sensors){
                 EditTextPreference sNew = new EditTextPreference(getActivity());
                 sNew.getEditText().setKeyListener(DigitsKeyListener.getInstance());
@@ -89,10 +75,8 @@ public class Preferences extends PreferenceActivity {
                             SensorManagerService.setLog(getActivity().getApplicationContext(), toChange);
                         }
 
-                        SharedPreferences.Editor editor;
-                        editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-                        editor.putInt(toChange.getName(), Integer.parseInt((String) newValue));
-                        editor.commit();
+                        prefEditor.putInt(toChange.getName(), Integer.parseInt((String) newValue));
+                        prefEditor.commit();
                         preference.setSummary(((Integer) Integer.parseInt((String) newValue)).toString());
                         return true;
                     }
