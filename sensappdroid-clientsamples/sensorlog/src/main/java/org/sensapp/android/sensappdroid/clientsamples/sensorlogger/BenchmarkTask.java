@@ -22,16 +22,18 @@ import java.util.TimerTask;
  * This class presents a minimalist service which use the SensApp android API to log the sensors.
  * It is started by the alarm manager and self stopped as soon every sensor has inserted a new measure.
  */
-public class SensorLoggerTask extends TimerTask implements SensorEventListener{
+public class BenchmarkTask extends TimerTask implements SensorEventListener{
 
-	private static final String TAG = SensorLoggerTask.class.getSimpleName();
+	private static final String TAG = BenchmarkTask.class.getSimpleName();
 
     static SensorManager sensorManager = null;
     static List<AbstractSensor> sensors;
     private AbstractSensor sensor = null;
     static Context context;
+    private long registerTime;
+    static final int NB_MEASURES = 10;
 
-    SensorLoggerTask(AbstractSensor as, Context c){
+    BenchmarkTask(AbstractSensor as, Context c){
         sensor = as;
         context = c;
         if(sensorManager == null){
@@ -46,11 +48,6 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
         if (SensAppHelper.isSensAppInstalled(context)) {
             if(sensors != null && sensor != null){
                 registerAndListenSensor();
-                if(sensor.getClass() != AndroidSensor.class){
-                    sensor.setData(context);
-                    sensor.insertMeasure(context);
-                    sensor.setLastMeasure(); //refresh time of the last measure
-                }
             }
         } else {
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
@@ -59,9 +56,10 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
     }
 
     private void registerAndListenSensor(){
-        sensor.registerInSensApp(context, R.drawable.ic_launcher);
-        if(sensor.isListened() && sensor.getClass() == AndroidSensor.class)
+        if(sensor.isListened() && sensor.getClass() == AndroidSensor.class){
+            registerTime = System.currentTimeMillis();
             sensorManager.registerListener(this, sensor.getSensor(), SensorManager.SENSOR_DELAY_UI);
+        }
     }
 
     @Override
@@ -74,9 +72,13 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
             else
                 sensor.setData(context, sensorEvent.values[0]);
 
-            sensor.insertMeasure(context);
             sensor.setLastMeasure();
             sensorManager.unregisterListener(this, sensor.getSensor());
+
+            ((AndroidSensor)sensor).setBenchmarkTime(((AndroidSensor)sensor).getBenchmarkTime()+(System.currentTimeMillis() - registerTime));
+            ((AndroidSensor)sensor).increaseNbMeasure();
+            if(((AndroidSensor)sensor).getNbMeasures() == NB_MEASURES)
+                BenchmarkService.cancelLog(context, sensor);
         }
     }
 
@@ -107,7 +109,7 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
     }
 
     static public void initSensorManager(Context c){
-        Intent startService = new Intent(c, SensorManagerService.class);
+        Intent startService = new Intent(c, BenchmarkService.class);
         PendingIntent pendingIntent = PendingIntent.getService(c, 0, startService, PendingIntent.FLAG_ONE_SHOT);
         ((AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent);
     }
@@ -125,25 +127,13 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
             AndroidSensor as = new AndroidSensor(s, compositeName);
             setUpSensor(as, sp, c);
         }
-
-        //Add Battery sensor
-        BatterySensor bs = new BatterySensor(compositeName);
-        setUpSensor(bs, sp, c);
-
-        //Add the Free Memory percentage
-        FreeMemorySensor fms = new FreeMemorySensor(compositeName);
-        setUpSensor(fms, sp, c);
     }
 
     static private void setUpSensor(AbstractSensor as, SharedPreferences sp, Context c){
-        as.setRefreshRate(sp.getInt(as.getName(), as.getDefaultRate()));
-        as.setListened(sp.getBoolean(as.getFullName(), false));
-        if(as instanceof AndroidSensor)
-            ((AndroidSensor) as).setBenchmarkAvg(sp.getFloat(as.getName()+"_avg", Float.NaN));
-        if(!sensors.contains(as))
-            addSensor(as);
-        if(as.isListened())
-            SensorManagerService.setLog(c, as);
+        as.setRefreshRate(100);
+        as.setListened(true);
+        addSensor(as);
+        BenchmarkService.setLog(c, as);
     }
 
     @Override

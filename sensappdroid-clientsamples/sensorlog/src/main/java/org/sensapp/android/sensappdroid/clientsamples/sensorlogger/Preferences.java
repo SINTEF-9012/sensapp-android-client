@@ -74,6 +74,8 @@ public class Preferences extends PreferenceActivity {
                             SensorManagerService.cancelLog(getActivity().getApplicationContext(), toChange);
                             SensorManagerService.setLog(getActivity().getApplicationContext(), toChange);
                         }
+                        if(toChange instanceof AndroidSensor)
+                            SensorActivity.refreshConsumption(toChange, getActivity().getApplicationContext());
 
                         prefEditor.putInt(toChange.getName(), Integer.parseInt((String) newValue));
                         prefEditor.commit();

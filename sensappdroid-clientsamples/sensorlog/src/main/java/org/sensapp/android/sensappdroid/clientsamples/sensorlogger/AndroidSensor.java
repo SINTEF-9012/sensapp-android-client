@@ -19,6 +19,9 @@ public class AndroidSensor extends AbstractSensor{
 
     private static final String TAG = AndroidSensor.class.getSimpleName();
     final static int DEFAULT_RATE = 500;
+    protected long benchmarkTime = 0;
+    protected int nbMeasures = 0;
+    protected float benchmarkAvg = 0;
 
     AndroidSensor(Sensor s, String composite) {
         mSensor = s;
@@ -134,6 +137,30 @@ public class AndroidSensor extends AbstractSensor{
 
     final public int getDefaultRate(){
         return DEFAULT_RATE;
+    }
+
+    public long getBenchmarkTime(){
+        return benchmarkTime;
+    }
+
+    public void setBenchmarkTime(long time){
+        benchmarkTime = time;
+    }
+
+    public float getBenchmarkAvg(){
+        return benchmarkAvg;
+    }
+
+    public void setBenchmarkAvg(float time){
+        benchmarkAvg = time;
+    }
+
+    public int getNbMeasures(){
+        return nbMeasures;
+    }
+
+    public void increaseNbMeasure(){
+        nbMeasures++;
     }
        /*
     public int getMeasureTime(){

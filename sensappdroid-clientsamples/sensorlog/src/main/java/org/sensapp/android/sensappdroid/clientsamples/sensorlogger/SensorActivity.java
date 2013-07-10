@@ -1,19 +1,23 @@
 package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.*;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ImageView;
-import org.sensapp.android.sensappdroid.api.SensAppHelper;
-import android.app.Activity;
-import android.os.Bundle;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import org.sensapp.android.sensappdroid.api.SensAppHelper;
+
+import java.util.Hashtable;
 
 /**
  * This is the UI used to run or stop the sensor logging into SensApp.
@@ -23,12 +27,25 @@ public class SensorActivity extends Activity{
     protected static final String SERVICE_RUNNING = "pref_service_is_running";
     private static final String TAG = SensorActivity.class.getSimpleName();
 
+    private GestureDetector gesturedetector = null;
+
+    static boolean BENCH_MARKED;
     final static int GREY=0xFFCCDDFF;
     static String compositeName = Build.MODEL + Build.ID;
+    static final Hashtable<AbstractSensor, TextView> consumptionTv = new Hashtable<AbstractSensor, TextView>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        //sp.edit().putBoolean(getString(R.string.benchmarked), false).commit();
+        BENCH_MARKED = sp.getBoolean(getString(R.string.benchmarked), false);
+        if(!BENCH_MARKED){
+            doBenchmark();
+            sp.edit().putBoolean(getString(R.string.benchmarked), true).commit();
+        }
 
         SensorLoggerTask.initSensorManager(getApplicationContext());
 
@@ -37,9 +54,11 @@ public class SensorActivity extends Activity{
         TextView title = (TextView)findViewById(R.id.app_title);
         title.setText(R.string.app_title);
 
+        gesturedetector = new GestureDetector(new MyGestureListener());
+
         SensorLoggerTask.initSensorArray();
 
-        compositeName = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName);
+        compositeName = sp.getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName);
 
         final LinearLayout l = (LinearLayout) findViewById(R.id.general_view);
 
@@ -78,18 +97,48 @@ public class SensorActivity extends Activity{
         return false;
     }
 
-    private void initMainAppView(LinearLayout l, LinearLayout line, LinearLayout img, final ImageView image, final Button b, final AbstractSensor as){
+    private void initMainAppView(LinearLayout l, final LinearLayout line, LinearLayout img, final ImageView image, final Button b, final AbstractSensor as){
         img.setPadding(65, 10, 55, 0);
         img.addView(image);
-        line.setPadding(0,11,50,0);
+        line.setPadding(0, 11, 50, 0);
         line.addView(img);
         line.addView(b);
-        line.setOnClickListener(new View.OnClickListener(){
+        line.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 OnClick(b, as, image);
             }
         });
+        /*line.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                String s = ((TextView)line.getChildAt(line.getChildCount()-1)).getText().toString();
+                if(s.contains("mAh"))
+                    line.removeViewAt(line.getChildCount()-1);
+
+
+                return gesturedetector.onTouchEvent(motionEvent);
+            }
+        });*/
+
+        if(as instanceof AndroidSensor){
+            double costPerHour = computeCostPerHour(as, getApplicationContext());
+            TextView tv = new TextView(getApplicationContext());
+            if(Double.valueOf(costPerHour).isNaN())
+                tv.setText("n/a");
+            else{
+                tv.setText(String.format("%.2f mAh",costPerHour));
+            }
+            line.addView(tv);
+            consumptionTv.put(as, tv);
+        }
+        else{
+            TextView tv = new TextView(getApplicationContext());
+            tv.setText("n/a");
+            line.addView(tv);
+            consumptionTv.put(as, tv);
+        }
+
         l.addView(line);
         LinearLayout separator = new LinearLayout(this);
         separator.setMinimumHeight(1);
@@ -158,10 +207,53 @@ public class SensorActivity extends Activity{
         //this.onDestroy();
     }
 
+    private void doBenchmark(){
+        BenchmarkTask.initSensorManager(getApplicationContext());
+        BenchmarkTask.initSensorArray();
+        BenchmarkTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE));
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         //Debug.stopMethodTracing();
+    }
+
+    static public void refreshConsumption(AbstractSensor as, Context c){
+        double costPerHour = computeCostPerHour(as, c);
+        if(Double.valueOf(costPerHour).isNaN())
+            consumptionTv.get(as).setText("n/a");
+        else{
+            consumptionTv.get(as).setText(String.format("%.2f mAh",costPerHour));
+        }
+    }
+
+    static private double computeCostPerHour(AbstractSensor as, Context c){
+        if(!(as instanceof AndroidSensor))
+            return Float.NaN;
+
+        int hour = 60000;
+        double nb_tick_hour = (double)hour/(as.getMeasureTime()/1000.0);
+
+        double avg = ((AndroidSensor) as).getBenchmarkAvg()/1000.0;
+        double costPerHour = nb_tick_hour*avg*as.getSensor().getPower();
+        return costPerHour;
+    }
+
+    public class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if(Math.abs(velocityX)>Math.abs(velocityY)){
+                if(velocityX>0){
+                    Log.d("coucou","Show Left");
+                }
+                else{
+                    Log.d("coucou","Show Right");
+                }
+                return true;
+            }
+            return false;
+        }
     }
 }
 
