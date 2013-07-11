@@ -53,6 +53,7 @@ public class Preferences extends PreferenceActivity {
                 }
             });
 
+            //Add Description EditText to the list of preferences
             description.setSummary(sp.getString(descriptionKey, "No description"));
             description.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
                 @Override
@@ -64,6 +65,7 @@ public class Preferences extends PreferenceActivity {
                 }
             });
 
+            //Add Battery EditText to the list of preferences
             battery.setSummary(sp.getString(batteryKey, "0"));
             battery.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
                 @Override

@@ -27,7 +27,7 @@ public class SensorActivity extends Activity{
     protected static final String SERVICE_RUNNING = "pref_service_is_running";
     private static final String TAG = SensorActivity.class.getSimpleName();
 
-    private GestureDetector gesturedetector = null;
+    //private GestureDetector gesturedetector = null;
 
     static boolean BENCH_MARKED;
     final static int GREY=0xFFCCDDFF;
@@ -55,7 +55,7 @@ public class SensorActivity extends Activity{
         TextView title = (TextView)findViewById(R.id.app_title);
         title.setText(R.string.app_title);
 
-        gesturedetector = new GestureDetector(new MyGestureListener());
+        //gesturedetector = new GestureDetector(new MyGestureListener());
 
         SensorLoggerTask.initSensorArray();
 
@@ -122,24 +122,10 @@ public class SensorActivity extends Activity{
             }
         });*/
 
-        //if(as instanceof AndroidSensor){
-            //double costPerHour = computeCostPerHour(as, getApplicationContext());
-            TextView tv = new TextView(getApplicationContext());
-            /*if(Double.valueOf(costPerHour).isNaN())
-                tv.setText("n/a");
-            else{
-                tv.setText(String.format("%.2f mAh",costPerHour));
-            } */
-            writeText(tv, computeCostPerHour(as, getApplicationContext()), getApplicationContext());
-            line.addView(tv);
-            consumptionTv.put(as, tv);
-        /*}
-        else{
-            TextView tv = new TextView(getApplicationContext());
-            tv.setText("n/a");
-            line.addView(tv);
-            consumptionTv.put(as, tv);
-        } */
+        TextView tv = new TextView(getApplicationContext());
+        writeText(tv, computeCostPerHour(as, getApplicationContext()), getApplicationContext());
+        line.addView(tv);
+        consumptionTv.put(as, tv);
 
         l.addView(line);
         LinearLayout separator = new LinearLayout(this);
@@ -176,8 +162,8 @@ public class SensorActivity extends Activity{
     }
 
     private void OnClick(Button b, AbstractSensor as, ImageView image){
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        if (!preferences.getBoolean(SERVICE_RUNNING, false)) {
+        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if (!sp.getBoolean(SERVICE_RUNNING, false)) {
             // If service is not already running.
             // Check if SensApp is installed.
             if (!SensAppHelper.isSensAppInstalled(getApplicationContext())) {
@@ -198,7 +184,7 @@ public class SensorActivity extends Activity{
             image.setImageResource(R.drawable.button_round_green);
             SensorManagerService.setLog(getApplicationContext(), as);
         }
-        preferences.edit().putBoolean(as.getFullName(), as.isListened()).commit();
+        sp.edit().putBoolean(as.getFullName(), as.isListened()).commit();
     }
 
     private void exitActivity(){
@@ -222,13 +208,7 @@ public class SensorActivity extends Activity{
     }
 
     static public void refreshConsumption(AbstractSensor as, Context c){
-        //double costPerHour = ;
         writeText(consumptionTv.get(as), computeCostPerHour(as, c), c);
-        /*if(Double.valueOf(costPerHour).isNaN())
-            consumptionTv.get(as).setText("n/a");
-        else{
-            consumptionTv.get(as).setText(String.format("%.2f mAh",costPerHour));
-        } */
     }
 
     static private void writeText(TextView tv, double value, Context c){
@@ -252,7 +232,7 @@ public class SensorActivity extends Activity{
 
 
         if(Double.valueOf(((AndroidSensor) as).getBenchmarkAvg()).isNaN()){
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
+            //SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
             ((AndroidSensor) as).setBenchmarkAvg(sp.getFloat(as.getName()+"_avg", Float.NaN));
         }
         double avg = ((AndroidSensor) as).getBenchmarkAvg()/1000.0;
@@ -261,7 +241,7 @@ public class SensorActivity extends Activity{
         return costPerHour;
     }
 
-    public class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+    /*public class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             if(Math.abs(velocityX)>Math.abs(velocityY)){
@@ -275,6 +255,6 @@ public class SensorActivity extends Activity{
             }
             return false;
         }
-    }
+    } */
 }
 

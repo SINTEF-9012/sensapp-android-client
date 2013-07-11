@@ -71,38 +71,6 @@ public class AndroidSensor extends AbstractSensor{
         data[1]=y*entryLevel;
         data[2]=z*entryLevel;
     }
-    /*
-    public void setListened(boolean set){
-        listened = set;
-    }
-
-    public boolean isListened(){
-        return listened;
-    }
-
-    public void setLastMeasure(){
-        lastMeasure = System.currentTimeMillis();
-    }
-
-    public long getLastMeasure(){
-        return lastMeasure;
-    }
-
-    public void setFreshMeasure(boolean setter){
-        freshMeasure = setter;
-    }
-
-    public boolean isFreshMeasure(){
-        return freshMeasure;
-    }
-
-    public void setMeasured(){
-        measured = true;
-    }
-
-    public boolean isMeasured(){
-        return measured;
-    }         */
 
     /**
      * Set up the entry level for each sensor.

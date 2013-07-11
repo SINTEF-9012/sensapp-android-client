@@ -35,7 +35,6 @@ public class BenchmarkService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //Make the service run infinitely
         myIntent = intent;
         return START_NOT_STICKY;
     }
