@@ -33,11 +33,11 @@ public abstract class AbstractSensor {
      * Then add the different sensors (x, y, z)
      * Then make the link between sensors and group
      */
-    public Uri registerInSensApp(Context context, int drawable){
+    public Uri registerInSensApp(Context context, int drawable, String description){
         Uri u = null;
         refreshRate = PreferenceManager.getDefaultSharedPreferences(context).getInt(getName(), getDefaultRate());
         if(!SensAppHelper.isCompositeRegistered(context, mComposite))
-            SensAppHelper.registerComposite(context, mComposite, "List some sensors of the tablet");
+            SensAppHelper.registerComposite(context, mComposite, description);
         if(isOneDataSensor()){
             u = SensAppHelper.registerNumericalSensor(context, getFullName(), getType(), getUnit(), drawable);
             if(!SensAppHelper.isComposeRegistered(context, mComposite, getFullName()))

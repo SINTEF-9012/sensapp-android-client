@@ -59,7 +59,8 @@ public class SensorLoggerTask extends TimerTask implements SensorEventListener{
     }
 
     private void registerAndListenSensor(){
-        sensor.registerInSensApp(context, R.drawable.ic_launcher);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sensor.registerInSensApp(context, R.drawable.ic_launcher, sp.getString(context.getString(R.string.pref_description_key), "No description"));
         if(sensor.isListened() && sensor.getClass() == AndroidSensor.class)
             sensorManager.registerListener(this, sensor.getSensor(), SensorManager.SENSOR_DELAY_UI);
     }

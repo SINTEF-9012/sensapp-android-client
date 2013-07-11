@@ -24,6 +24,19 @@
                 android:key="@string/pref_compositename_key"
                 android:title="Device Name"
                 android:dialogTitle="Set the name you want for your device"/>
+        <EditTextPreference
+                android:id="@+id/pref_description"
+                android:key="@string/pref_description_key"
+                android:title="Device description"
+                android:dialogTitle="Set the description for your device"
+                android:defaultValue="No description"/>
+        <EditTextPreference
+                android:id="@+id/pref_battery"
+                android:key="@string/pref_battery_key"
+                android:title="Battery power (mAh)"
+                android:dialogTitle="Set the battery power of the device"
+                android:defaultValue="0"
+                android:inputType="numberDecimal"/>
     </PreferenceCategory>
 
     <PreferenceCategory

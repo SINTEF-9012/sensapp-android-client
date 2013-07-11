@@ -21,9 +21,13 @@ public class Preferences extends PreferenceActivity {
             List<AbstractSensor> sensors = SensorLoggerTask.getSensors();
 
             final String compositeNameKey = getString(R.string.pref_compositename_key);
+            final String descriptionKey = getString(R.string.pref_description_key);
+            final String batteryKey = getString(R.string.pref_battery_key);
             final EditTextPreference compositeName = (EditTextPreference) findPreference(compositeNameKey);
+            final EditTextPreference description = (EditTextPreference) findPreference(descriptionKey);
+            final EditTextPreference battery = (EditTextPreference) findPreference(batteryKey);
             final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
-            final SharedPreferences.Editor prefEditor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+            final SharedPreferences.Editor prefEditor = sp.edit();
 
             //Add Composite Name EditText to the list of preferences
             compositeName.setDefaultValue(sp.getString(compositeNameKey, SensorActivity.compositeName));
@@ -44,6 +48,32 @@ public class Preferences extends PreferenceActivity {
                                 s.setCompositeName(name);
                         }
                     }
+
+                    return true;
+                }
+            });
+
+            description.setSummary(sp.getString(descriptionKey, "No description"));
+            description.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    String desc = (String)newValue;
+                    prefEditor.putString(descriptionKey, desc).commit();
+                    description.setSummary(desc);
+                    return true;
+                }
+            });
+
+            battery.setSummary(sp.getString(batteryKey, "0"));
+            battery.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    int bat = Integer.parseInt((String)newValue);
+                    prefEditor.putString(batteryKey, String.valueOf(bat)).commit();
+                    battery.setSummary(String.valueOf(bat));
+
+                    for(AbstractSensor as: SensorLoggerTask.sensors)
+                        SensorActivity.refreshConsumption(as, getActivity().getApplicationContext());
 
                     return true;
                 }

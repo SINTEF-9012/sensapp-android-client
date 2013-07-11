@@ -2,7 +2,6 @@ package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 
 import android.content.Context;
 import android.hardware.Sensor;
-import android.net.Uri;
 import android.os.Environment;
 import android.os.StatFs;
 import org.sensapp.android.sensappdroid.api.SensAppUnit;
@@ -30,10 +29,6 @@ public class FreeMemorySensor extends AbstractSensor {
 
     void initData(){
         data = new float[1];
-    }
-
-    public Uri registerInSensApp(Context context, int drawable){
-        return super.registerInSensApp(context, drawable);
     }
 
     public void setData(Context context){

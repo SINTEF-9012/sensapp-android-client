@@ -21,7 +21,7 @@ public class AndroidSensor extends AbstractSensor{
     final static int DEFAULT_RATE = 500;
     protected long benchmarkTime = 0;
     protected int nbMeasures = 0;
-    protected float benchmarkAvg = 0;
+    protected double benchmarkAvg = 0;
 
     AndroidSensor(Sensor s, String composite) {
         mSensor = s;
@@ -147,11 +147,11 @@ public class AndroidSensor extends AbstractSensor{
         benchmarkTime = time;
     }
 
-    public float getBenchmarkAvg(){
+    public double getBenchmarkAvg(){
         return benchmarkAvg;
     }
 
-    public void setBenchmarkAvg(float time){
+    public void setBenchmarkAvg(double time){
         benchmarkAvg = time;
     }
 

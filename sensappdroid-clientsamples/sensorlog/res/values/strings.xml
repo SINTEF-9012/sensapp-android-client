@@ -30,6 +30,8 @@
 
     <string name="pref_sensorname_key2">pref_sensorname_key2</string>
     <string name="pref_compositename_key">pref_compositename_key</string>
+    <string name="pref_description_key">pref_description_key</string>
+    <string name="pref_battery_key">pref_battery_key2</string>
     <string name="pref_compositename_id">pref_compositename_id</string>
 
     <string name="benchmarked">has_been_benchmarked</string>

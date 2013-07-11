@@ -102,7 +102,7 @@ public class BenchmarkService extends Service {
                 float power = s.getSensor().getPower();
 
                 sp.edit().putFloat(s.getName()+"_avg", (float)s.getBenchmarkTime() / s.getNbMeasures()).commit();
-                s.setBenchmarkAvg((float)s.getBenchmarkTime() / s.getNbMeasures());
+                s.setBenchmarkAvg((double)s.getBenchmarkTime() / s.getNbMeasures());
 
                 SensorActivity.refreshConsumption(abs, c);
             }

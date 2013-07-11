@@ -33,12 +33,13 @@ public class SensorActivity extends Activity{
     final static int GREY=0xFFCCDDFF;
     static String compositeName = Build.MODEL + Build.ID;
     static final Hashtable<AbstractSensor, TextView> consumptionTv = new Hashtable<AbstractSensor, TextView>();
+    static SharedPreferences sp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         //sp.edit().putBoolean(getString(R.string.benchmarked), false).commit();
         BENCH_MARKED = sp.getBoolean(getString(R.string.benchmarked), false);
@@ -121,23 +122,24 @@ public class SensorActivity extends Activity{
             }
         });*/
 
-        if(as instanceof AndroidSensor){
-            double costPerHour = computeCostPerHour(as, getApplicationContext());
+        //if(as instanceof AndroidSensor){
+            //double costPerHour = computeCostPerHour(as, getApplicationContext());
             TextView tv = new TextView(getApplicationContext());
-            if(Double.valueOf(costPerHour).isNaN())
+            /*if(Double.valueOf(costPerHour).isNaN())
                 tv.setText("n/a");
             else{
                 tv.setText(String.format("%.2f mAh",costPerHour));
-            }
+            } */
+            writeText(tv, computeCostPerHour(as, getApplicationContext()), getApplicationContext());
             line.addView(tv);
             consumptionTv.put(as, tv);
-        }
+        /*}
         else{
             TextView tv = new TextView(getApplicationContext());
             tv.setText("n/a");
             line.addView(tv);
             consumptionTv.put(as, tv);
-        }
+        } */
 
         l.addView(line);
         LinearLayout separator = new LinearLayout(this);
@@ -220,11 +222,24 @@ public class SensorActivity extends Activity{
     }
 
     static public void refreshConsumption(AbstractSensor as, Context c){
-        double costPerHour = computeCostPerHour(as, c);
-        if(Double.valueOf(costPerHour).isNaN())
+        //double costPerHour = ;
+        writeText(consumptionTv.get(as), computeCostPerHour(as, c), c);
+        /*if(Double.valueOf(costPerHour).isNaN())
             consumptionTv.get(as).setText("n/a");
         else{
             consumptionTv.get(as).setText(String.format("%.2f mAh",costPerHour));
+        } */
+    }
+
+    static private void writeText(TextView tv, double value, Context c){
+        if(Double.valueOf(value).isNaN())
+            tv.setText("n/a");
+        else{
+            int batteryPower = Integer.parseInt(sp.getString(c.getString(R.string.pref_battery_key), "0"));
+            if(batteryPower == 0)
+                tv.setText(String.format("%.2f mAh", value));
+            else
+                tv.setText(String.format("%.2f mAh (%.2f%%)", value, (value/batteryPower*100.0)));
         }
     }
 
@@ -235,7 +250,13 @@ public class SensorActivity extends Activity{
         int hour = 60000;
         double nb_tick_hour = (double)hour/(as.getMeasureTime()/1000.0);
 
+
+        if(Double.valueOf(((AndroidSensor) as).getBenchmarkAvg()).isNaN()){
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
+            ((AndroidSensor) as).setBenchmarkAvg(sp.getFloat(as.getName()+"_avg", Float.NaN));
+        }
         double avg = ((AndroidSensor) as).getBenchmarkAvg()/1000.0;
+
         double costPerHour = nb_tick_hour*avg*as.getSensor().getPower();
         return costPerHour;
     }
