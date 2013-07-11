@@ -26,7 +26,7 @@ public class SensorManagerService extends Service {
     private static final int ACTIVE_NOTIFICATION_ID = 79290;
     private static final String TAG = SensorManagerService.class.getSimpleName();
     private static Timer timer = null;
-    private static List<SensorLoggerTask> taskList= new ArrayList<SensorLoggerTask>();
+    private static List<AbstractSensorLoggerTask> taskList= new ArrayList<AbstractSensorLoggerTask>();
     private static Intent myIntent;
 
     @Override
@@ -39,7 +39,7 @@ public class SensorManagerService extends Service {
     @Override
     public void onCreate(){
         super.onCreate();
-        SensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE));
+        AbstractSensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE));
     }
 
     @Override
@@ -58,7 +58,12 @@ public class SensorManagerService extends Service {
         if(timer == null)
             timer = new Timer(false);
 
-        SensorLoggerTask newTask = new SensorLoggerTask(as, context);
+        AbstractSensorLoggerTask newTask;
+        if(as instanceof AndroidSensor)
+            newTask = new AndroidSensorLoggerTask((AndroidSensor)as, context);
+        else
+            newTask = new SensorLoggerTask(as, context);
+
         taskList.add(newTask);
         timer.scheduleAtFixedRate(newTask, 0, as.getMeasureTime());
 
@@ -74,7 +79,7 @@ public class SensorManagerService extends Service {
     }
 
     protected static void cancelLog(Context context, AbstractSensor as) {
-        SensorLoggerTask cancelledTask = getTaskByAbstractSensor(as);
+        AbstractSensorLoggerTask cancelledTask = getTaskByAbstractSensor(as);
         if(cancelledTask == null)
             return;
 
@@ -90,8 +95,8 @@ public class SensorManagerService extends Service {
         }
     }
 
-    private static SensorLoggerTask getTaskByAbstractSensor(AbstractSensor as){
-        for(SensorLoggerTask t : taskList)
+    private static AbstractSensorLoggerTask getTaskByAbstractSensor(AbstractSensor as){
+        for(AbstractSensorLoggerTask t : taskList)
             if(t.getSensor().equals(as))
                 return t;
         return null;

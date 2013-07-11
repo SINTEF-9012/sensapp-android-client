@@ -18,7 +18,7 @@ public class Preferences extends PreferenceActivity {
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.xml.preferences);
-            List<AbstractSensor> sensors = SensorLoggerTask.getSensors();
+            List<AbstractSensor> sensors = AbstractSensorLoggerTask.getSensors();
 
             final String compositeNameKey = getString(R.string.pref_compositename_key);
             final String descriptionKey = getString(R.string.pref_description_key);
@@ -43,8 +43,8 @@ public class Preferences extends PreferenceActivity {
 
                     if(!name.equals(lastName)){
                         SensorActivity.compositeName = name;
-                        if(SensorLoggerTask.sensors != null){
-                            for(AbstractSensor s : SensorLoggerTask.sensors)
+                        if(AbstractSensorLoggerTask.sensors != null){
+                            for(AbstractSensor s : AbstractSensorLoggerTask.sensors)
                                 s.setCompositeName(name);
                         }
                     }
@@ -74,7 +74,7 @@ public class Preferences extends PreferenceActivity {
                     prefEditor.putString(batteryKey, String.valueOf(bat)).commit();
                     battery.setSummary(String.valueOf(bat));
 
-                    for(AbstractSensor as: SensorLoggerTask.sensors)
+                    for(AbstractSensor as: AbstractSensorLoggerTask.sensors)
                         SensorActivity.refreshConsumption(as, getActivity().getApplicationContext());
 
                     return true;
@@ -98,7 +98,7 @@ public class Preferences extends PreferenceActivity {
                         if (((String) newValue).isEmpty()) {
                             return false;
                         }
-                        AbstractSensor toChange = SensorLoggerTask.getSensorByName((String) preference.getTitle());
+                        AbstractSensor toChange = AbstractSensorLoggerTask.getSensorByName((String) preference.getTitle());
                         toChange.setRefreshRate(Integer.parseInt((String) newValue));
 
                         if(toChange.isListened()){

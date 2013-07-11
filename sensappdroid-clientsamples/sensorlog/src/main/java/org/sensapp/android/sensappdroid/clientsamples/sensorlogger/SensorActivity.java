@@ -9,7 +9,6 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.*;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -48,7 +47,7 @@ public class SensorActivity extends Activity{
             sp.edit().putBoolean(getString(R.string.benchmarked), true).commit();
         }
 
-        SensorLoggerTask.initSensorManager(getApplicationContext());
+        AbstractSensorLoggerTask.initSensorManager(getApplicationContext());
 
         //Debug.startMethodTracing("SensorActivity");
         setContentView(R.layout.activity_main);
@@ -57,14 +56,14 @@ public class SensorActivity extends Activity{
 
         //gesturedetector = new GestureDetector(new MyGestureListener());
 
-        SensorLoggerTask.initSensorArray();
+        AbstractSensorLoggerTask.initSensorArray();
 
         compositeName = sp.getString(getString(R.string.pref_compositename_key), SensorActivity.compositeName);
 
         final LinearLayout l = (LinearLayout) findViewById(R.id.general_view);
 
-        SensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE));
-        for(AbstractSensor s: SensorLoggerTask.sensors)
+        AbstractSensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE));
+        for(AbstractSensor s: AbstractSensorLoggerTask.sensors)
             addAbstractSensor(s, l);
     }
 
@@ -188,7 +187,7 @@ public class SensorActivity extends Activity{
     }
 
     private void exitActivity(){
-        for(AbstractSensor as : SensorLoggerTask.sensors)
+        for(AbstractSensor as : AbstractSensorLoggerTask.sensors)
             SensorManagerService.cancelLog(getApplicationContext(), as);
         getApplicationContext().stopService(SensorManagerService.getIntent());
         this.finish();
