@@ -20,8 +20,6 @@ import java.util.TimerTask;
  */
 public abstract class AbstractSensorLoggerTask extends TimerTask{
 
-	private static final String TAG = AbstractSensorLoggerTask.class.getSimpleName();
-
     static SensorManager sensorManager = null;
     static List<AbstractSensor> sensors;
     protected AbstractSensor sensor = null;

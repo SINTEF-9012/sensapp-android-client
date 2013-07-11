@@ -24,12 +24,10 @@ import java.util.TimerTask;
  */
 public class BenchmarkTask extends TimerTask implements SensorEventListener{
 
-	private static final String TAG = BenchmarkTask.class.getSimpleName();
-
-    static SensorManager sensorManager = null;
+    static private SensorManager sensorManager = null;
     static List<AbstractSensor> sensors;
     private AbstractSensor sensor = null;
-    static Context context;
+    static private Context context;
     private long registerTime;
     static final int NB_MEASURES = 10;
 
@@ -125,11 +123,11 @@ public class BenchmarkTask extends TimerTask implements SensorEventListener{
 
         for(Sensor s: sensorManager.getSensorList(Sensor.TYPE_ALL)){
             AndroidSensor as = new AndroidSensor(s, compositeName);
-            setUpSensor(as, sp, c);
+            setUpSensor(as, c);
         }
     }
 
-    static private void setUpSensor(AbstractSensor as, SharedPreferences sp, Context c){
+    static private void setUpSensor(AbstractSensor as, Context c){
         as.setRefreshRate(100);
         as.setListened(true);
         addSensor(as);

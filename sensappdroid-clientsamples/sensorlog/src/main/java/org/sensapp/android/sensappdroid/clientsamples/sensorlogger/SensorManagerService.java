@@ -23,11 +23,10 @@ import java.util.Timer;
  */
 public class SensorManagerService extends Service {
 
-    private static final int ACTIVE_NOTIFICATION_ID = 79290;
-    private static final String TAG = SensorManagerService.class.getSimpleName();
-    private static Timer timer = null;
-    private static List<AbstractSensorLoggerTask> taskList= new ArrayList<AbstractSensorLoggerTask>();
-    private static Intent myIntent;
+    static private final int ACTIVE_NOTIFICATION_ID = 79290;
+    static private Timer timer = null;
+    static private List<AbstractSensorLoggerTask> taskList= new ArrayList<AbstractSensorLoggerTask>();
+    static private Intent myIntent;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -96,9 +95,10 @@ public class SensorManagerService extends Service {
     }
 
     private static AbstractSensorLoggerTask getTaskByAbstractSensor(AbstractSensor as){
-        for(AbstractSensorLoggerTask t : taskList)
+        for(AbstractSensorLoggerTask t : taskList){
             if(t.getSensor().equals(as))
                 return t;
+        }
         return null;
     }
 

@@ -16,12 +16,10 @@ import org.sensapp.android.sensappdroid.api.SensAppUnit;
  */
 
 public class AndroidSensor extends AbstractSensor{
-
-    private static final String TAG = AndroidSensor.class.getSimpleName();
-    final static int DEFAULT_RATE = 500;
-    protected long benchmarkTime = 0;
-    protected int nbMeasures = 0;
-    protected double benchmarkAvg = 0;
+    static final int DEFAULT_RATE = 500;
+    private long benchmarkTime = 0;
+    private int nbMeasures = 0;
+    private double benchmarkAvg = 0;
 
     AndroidSensor(Sensor s, String composite) {
         mSensor = s;
@@ -31,7 +29,7 @@ public class AndroidSensor extends AbstractSensor{
     }
 
     @SuppressWarnings("deprecation") // We don't want target only API 16...
-    public boolean isThreeDataSensor(){
+    final public boolean isThreeDataSensor(){
         return (mSensor.getType() == Sensor.TYPE_ACCELEROMETER
                 || mSensor.getType() == Sensor.TYPE_GYROSCOPE
                 || mSensor.getType() == Sensor.TYPE_MAGNETIC_FIELD
@@ -42,7 +40,7 @@ public class AndroidSensor extends AbstractSensor{
     }
 
     @SuppressWarnings("deprecation") // We don't want target only API 16...
-    public boolean isOneDataSensor(){
+    final public boolean isOneDataSensor(){
         return (mSensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE
                 || mSensor.getType() == Sensor.TYPE_LIGHT
                 || mSensor.getType() == Sensor.TYPE_PRESSURE
@@ -77,7 +75,7 @@ public class AndroidSensor extends AbstractSensor{
      * Here are just some examples based on our experiment tablet.
      */
     @SuppressWarnings("deprecation") // We don't want target only API 16...
-    private void setEntryLevel(){
+    final private void setEntryLevel(){
         switch(mSensor.getType()){
             case Sensor.TYPE_MAGNETIC_FIELD:entryLevel = (float)0.000001;break;          //uTesla to Tesla
             case Sensor.TYPE_ORIENTATION:entryLevel = (float)(Math.PI/180.0);break;//Deg to Rad
@@ -130,14 +128,6 @@ public class AndroidSensor extends AbstractSensor{
     public void increaseNbMeasure(){
         nbMeasures++;
     }
-       /*
-    public int getMeasureTime(){
-        return refreshRate;
-    }
-
-    public void setRefreshRate(int rate){
-        refreshRate = rate;
-    }     */
 
     @SuppressWarnings("deprecation") // We don't want target only API 16...
     public String getType() {

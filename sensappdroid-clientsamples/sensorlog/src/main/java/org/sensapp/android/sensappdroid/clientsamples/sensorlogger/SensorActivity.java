@@ -9,7 +9,10 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.*;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,22 +20,19 @@ import android.widget.TextView;
 import org.sensapp.android.sensappdroid.api.SensAppHelper;
 
 import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * This is the UI used to run or stop the sensor logging into SensApp.
  */
 public class SensorActivity extends Activity{
 
-    protected static final String SERVICE_RUNNING = "pref_service_is_running";
-    private static final String TAG = SensorActivity.class.getSimpleName();
-
-    //private GestureDetector gesturedetector = null;
-
-    static boolean BENCH_MARKED;
-    final static int GREY=0xFFCCDDFF;
+    static protected final String SERVICE_RUNNING = "pref_service_is_running";
+    static private boolean BENCH_MARKED;
+    static final int GREY=0xFFCCDDFF;
     static String compositeName = Build.MODEL + Build.ID;
-    static final Hashtable<AbstractSensor, TextView> consumptionTv = new Hashtable<AbstractSensor, TextView>();
-    static SharedPreferences sp;
+    static final Map<AbstractSensor, TextView> consumptionTv = new Hashtable<AbstractSensor, TextView>();
+    static private SharedPreferences sp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +40,6 @@ public class SensorActivity extends Activity{
 
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        //sp.edit().putBoolean(getString(R.string.benchmarked), false).commit();
         BENCH_MARKED = sp.getBoolean(getString(R.string.benchmarked), false);
         if(!BENCH_MARKED){
             doBenchmark();
@@ -49,12 +48,9 @@ public class SensorActivity extends Activity{
 
         AbstractSensorLoggerTask.initSensorManager(getApplicationContext());
 
-        //Debug.startMethodTracing("SensorActivity");
         setContentView(R.layout.activity_main);
         TextView title = (TextView)findViewById(R.id.app_title);
         title.setText(R.string.app_title);
-
-        //gesturedetector = new GestureDetector(new MyGestureListener());
 
         AbstractSensorLoggerTask.initSensorArray();
 
@@ -106,23 +102,12 @@ public class SensorActivity extends Activity{
         line.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                OnClick(b, as, image);
+                myOnClick(b, as, image);
             }
         });
-        /*line.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                String s = ((TextView)line.getChildAt(line.getChildCount()-1)).getText().toString();
-                if(s.contains("mAh"))
-                    line.removeViewAt(line.getChildCount()-1);
-
-
-                return gesturedetector.onTouchEvent(motionEvent);
-            }
-        });*/
 
         TextView tv = new TextView(getApplicationContext());
-        writeText(tv, computeCostPerHour(as, getApplicationContext()), getApplicationContext());
+        writeText(tv, computeCostPerHour(as), getApplicationContext());
         line.addView(tv);
         consumptionTv.put(as, tv);
 
@@ -146,7 +131,7 @@ public class SensorActivity extends Activity{
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                OnClick(b, as, image);
+                myOnClick(b, as, image);
             }
         });
     }
@@ -160,8 +145,7 @@ public class SensorActivity extends Activity{
         img.setScaleType(ImageView.ScaleType.FIT_START);
     }
 
-    private void OnClick(Button b, AbstractSensor as, ImageView image){
-        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    private void myOnClick(Button b, AbstractSensor as, ImageView image){
         if (!sp.getBoolean(SERVICE_RUNNING, false)) {
             // If service is not already running.
             // Check if SensApp is installed.
@@ -191,7 +175,6 @@ public class SensorActivity extends Activity{
             SensorManagerService.cancelLog(getApplicationContext(), as);
         getApplicationContext().stopService(SensorManagerService.getIntent());
         this.finish();
-        //this.onDestroy();
     }
 
     private void doBenchmark(){
@@ -200,14 +183,8 @@ public class SensorActivity extends Activity{
         BenchmarkTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE));
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        //Debug.stopMethodTracing();
-    }
-
     static public void refreshConsumption(AbstractSensor as, Context c){
-        writeText(consumptionTv.get(as), computeCostPerHour(as, c), c);
+        writeText(consumptionTv.get(as), computeCostPerHour(as), c);
     }
 
     static private void writeText(TextView tv, double value, Context c){
@@ -222,38 +199,20 @@ public class SensorActivity extends Activity{
         }
     }
 
-    static private double computeCostPerHour(AbstractSensor as, Context c){
+    static private double computeCostPerHour(AbstractSensor as){
         if(!(as instanceof AndroidSensor))
             return Float.NaN;
 
         int hour = 60000;
-        double nb_tick_hour = (double)hour/(as.getMeasureTime()/1000.0);
+        double nbTickHour = (double)hour/(as.getMeasureTime()/1000.0);
 
 
         if(Double.valueOf(((AndroidSensor) as).getBenchmarkAvg()).isNaN()){
-            //SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
             ((AndroidSensor) as).setBenchmarkAvg(sp.getFloat(as.getName()+"_avg", Float.NaN));
         }
         double avg = ((AndroidSensor) as).getBenchmarkAvg()/1000.0;
 
-        double costPerHour = nb_tick_hour*avg*as.getSensor().getPower();
-        return costPerHour;
+        return nbTickHour*avg*as.getSensor().getPower();
     }
-
-    /*public class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if(Math.abs(velocityX)>Math.abs(velocityY)){
-                if(velocityX>0){
-                    Log.d("coucou","Show Left");
-                }
-                else{
-                    Log.d("coucou","Show Right");
-                }
-                return true;
-            }
-            return false;
-        }
-    } */
 }
 

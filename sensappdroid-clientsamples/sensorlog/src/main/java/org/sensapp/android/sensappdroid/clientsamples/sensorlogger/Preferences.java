@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class Preferences extends PreferenceActivity {
 
-	public static class PreferencesFragment extends PreferenceFragment {
+    static public class PreferencesFragment extends PreferenceFragment {
         @Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
@@ -83,7 +83,7 @@ public class Preferences extends PreferenceActivity {
 
             //Add the sensors refresh rate into 'preferences'
             for(AbstractSensor s: sensors){
-                EditTextPreference sNew = new EditTextPreference(getActivity());
+                final EditTextPreference sNew = new EditTextPreference(getActivity());
                 sNew.getEditText().setKeyListener(DigitsKeyListener.getInstance());
                 sNew.setTitle(s.getName());
                 sNew.setDialogTitle("Enter the refresh rate you wish for this sensor.");
@@ -95,23 +95,20 @@ public class Preferences extends PreferenceActivity {
                 //set the function called when preferences changed for this preference/sensor
                 sNew.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
-                        if (((String) newValue).isEmpty()) {
+                        if (((String) newValue).isEmpty())
                             return false;
-                        }
                         AbstractSensor toChange = AbstractSensorLoggerTask.getSensorByName((String) preference.getTitle());
                         toChange.setRefreshRate(Integer.parseInt((String) newValue));
+                        prefEditor.putInt(toChange.getName(), Integer.parseInt((String) newValue)).commit();
+                        sNew.setSummary(((Integer) Integer.parseInt((String) newValue)).toString());
 
                         if(toChange.isListened()){
-
                             SensorManagerService.cancelLog(getActivity().getApplicationContext(), toChange);
                             SensorManagerService.setLog(getActivity().getApplicationContext(), toChange);
                         }
                         if(toChange instanceof AndroidSensor)
                             SensorActivity.refreshConsumption(toChange, getActivity().getApplicationContext());
 
-                        prefEditor.putInt(toChange.getName(), Integer.parseInt((String) newValue));
-                        prefEditor.commit();
-                        preference.setSummary(((Integer) Integer.parseInt((String) newValue)).toString());
                         return true;
                     }
                 });

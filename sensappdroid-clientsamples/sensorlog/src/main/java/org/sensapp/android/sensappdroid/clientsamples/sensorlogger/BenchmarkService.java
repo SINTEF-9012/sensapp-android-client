@@ -26,12 +26,11 @@ import java.util.Timer;
  */
 public class BenchmarkService extends Service {
 
-    private static final int ACTIVE_NOTIFICATION_ID = 79290;
-    private static final String TAG = BenchmarkService.class.getSimpleName();
-    private static Timer timer = null;
-    private static List<BenchmarkTask> taskList= new ArrayList<BenchmarkTask>();
-    private static Intent myIntent;
-    static SharedPreferences sp;
+    static private final int ACTIVE_NOTIFICATION_ID = 79290;
+    static private Timer timer = null;
+    static private List<BenchmarkTask> taskList= new ArrayList<BenchmarkTask>();
+    static private Intent myIntent;
+    static private SharedPreferences sp;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -89,7 +88,6 @@ public class BenchmarkService extends Service {
             timer.cancel();
             timer = null;
             ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(ACTIVE_NOTIFICATION_ID);
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
             sp.edit().putBoolean(SensorActivity.SERVICE_RUNNING, false).commit();
         }
     }
@@ -98,8 +96,6 @@ public class BenchmarkService extends Service {
         for(AbstractSensor abs: BenchmarkTask.sensors){
             if(abs instanceof AndroidSensor){
                 AndroidSensor s = (AndroidSensor)abs;
-                float power = s.getSensor().getPower();
-
                 sp.edit().putFloat(s.getName()+"_avg", (float)s.getBenchmarkTime() / s.getNbMeasures()).commit();
                 s.setBenchmarkAvg((double)s.getBenchmarkTime() / s.getNbMeasures());
 
@@ -109,9 +105,10 @@ public class BenchmarkService extends Service {
     }
 
     private static BenchmarkTask getTaskByAbstractSensor(AbstractSensor as){
-        for(BenchmarkTask t : taskList)
+        for(BenchmarkTask t : taskList){
             if(t.getSensor().equals(as))
                 return t;
+        }
         return null;
     }
 

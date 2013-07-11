@@ -14,7 +14,7 @@ import org.sensapp.android.sensappdroid.api.SensAppUnit;
  */
 public class FreeMemorySensor extends AbstractSensor {
 
-    final static int DEFAULT_RATE = 10000;
+    static final int DEFAULT_RATE = 10000;
 
     FreeMemorySensor(String composite) {
         mSensor = null;
@@ -23,16 +23,16 @@ public class FreeMemorySensor extends AbstractSensor {
         mComposite = composite;
     }
 
-    void setEntryLevel(){
+    final void setEntryLevel(){
         entryLevel = 1;
     }
 
-    void initData(){
+    final void initData(){
         data = new float[1];
     }
 
     public void setData(Context context){
-        float level = (float)FreeMemory()/TotalMemory()*100;
+        float level = (float)freeMemory()/totalMemory()*100;
         data[0] = level;
     }
 
@@ -68,24 +68,16 @@ public class FreeMemorySensor extends AbstractSensor {
         return SensAppUnit.PERCENT;
     }
 
-    public int TotalMemory()
+    public int totalMemory()
     {
         StatFs statFs = new StatFs(Environment.getRootDirectory().getAbsolutePath());
         return (statFs.getBlockCount() * statFs.getBlockSize()) / 1048576;
     }
 
-    public int FreeMemory()
+    public int freeMemory()
     {
         StatFs statFs = new StatFs(Environment.getRootDirectory().getAbsolutePath());
         return (statFs.getAvailableBlocks() * statFs.getBlockSize()) / 1048576;
-    }
-
-    public int BusyMemory()
-    {
-        StatFs statFs = new StatFs(Environment.getRootDirectory().getAbsolutePath());
-        int Total = (statFs.getBlockCount() * statFs.getBlockSize()) / 1048576;
-        int Free  = (statFs.getAvailableBlocks() * statFs.getBlockSize()) / 1048576;
-        return Total - Free;
     }
 
     final public int getDefaultRate(){

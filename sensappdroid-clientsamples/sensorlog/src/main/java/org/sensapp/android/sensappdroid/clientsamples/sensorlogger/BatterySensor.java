@@ -15,7 +15,7 @@ import org.sensapp.android.sensappdroid.api.SensAppUnit;
  */
 public class BatterySensor extends AbstractSensor {
 
-    final static int DEFAULT_RATE = 5000;
+    static final int DEFAULT_RATE = 5000;
 
     BatterySensor(String composite) {
         mSensor = null;
@@ -24,11 +24,11 @@ public class BatterySensor extends AbstractSensor {
         mComposite = composite;
     }
 
-    void setEntryLevel(){
+    final void setEntryLevel(){
         entryLevel = 1;
     }
 
-    void initData(){
+    final void initData(){
         data = new float[1];
     }
 
