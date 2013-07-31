@@ -10,6 +10,11 @@ import android.content.SharedPreferences;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog.AbstractSensorLoggerTask;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog.AndroidSensorLoggerTask;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog.SensorLoggerTask;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AbstractSensor;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AndroidSensor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +51,7 @@ public class SensorManagerService extends Service {
         return null;
     }
 
-    protected static void setLog(Context context, AbstractSensor as) {
+    static public void setLog(Context context, AbstractSensor as) {
         //if log already active for this sensor
         if(getTaskByAbstractSensor(as) != null)
             return;

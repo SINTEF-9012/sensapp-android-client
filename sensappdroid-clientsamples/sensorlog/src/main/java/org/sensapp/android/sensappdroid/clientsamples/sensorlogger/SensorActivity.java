@@ -18,6 +18,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.sensapp.android.sensappdroid.api.SensAppHelper;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.benchmark.BenchmarkTask;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog.AbstractSensorLoggerTask;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AbstractSensor;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AndroidSensor;
 
 import java.util.Hashtable;
 import java.util.Map;
@@ -27,10 +31,10 @@ import java.util.Map;
  */
 public class SensorActivity extends Activity{
 
-    static protected final String SERVICE_RUNNING = "pref_service_is_running";
+    static public final String SERVICE_RUNNING = "pref_service_is_running";
     static private boolean BENCH_MARKED;
     static final int GREY=0xFFCCDDFF;
-    static String compositeName = Build.MODEL + Build.ID;
+    static public String compositeName = Build.MODEL + Build.ID;
     static final Map<AbstractSensor, TextView> consumptionTv = new Hashtable<AbstractSensor, TextView>();
     static private SharedPreferences sp;
 

@@ -1,4 +1,4 @@
-package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
+package org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +17,7 @@ public class BatterySensor extends AbstractSensor {
 
     static final int DEFAULT_RATE = 5000;
 
-    BatterySensor(String composite) {
+    public BatterySensor(String composite) {
         mSensor = null;
         setEntryLevel();
         initData();

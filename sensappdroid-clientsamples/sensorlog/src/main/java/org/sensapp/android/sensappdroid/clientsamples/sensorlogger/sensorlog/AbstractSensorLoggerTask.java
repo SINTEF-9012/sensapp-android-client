@@ -1,4 +1,4 @@
-package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
+package org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -8,6 +8,13 @@ import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.preference.PreferenceManager;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.R;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.SensorActivity;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.SensorManagerService;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AbstractSensor;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AndroidSensor;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.BatterySensor;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.FreeMemorySensor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +28,7 @@ import java.util.TimerTask;
 public abstract class AbstractSensorLoggerTask extends TimerTask{
 
     static SensorManager sensorManager = null;
-    static List<AbstractSensor> sensors;
+    static public List<AbstractSensor> sensors;
     protected AbstractSensor sensor = null;
     static Context context;
 
