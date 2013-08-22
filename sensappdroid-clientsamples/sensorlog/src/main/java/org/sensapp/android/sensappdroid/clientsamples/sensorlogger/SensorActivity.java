@@ -1,6 +1,7 @@
 package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,6 +38,7 @@ public class SensorActivity extends Activity{
     static public String compositeName = Build.MODEL + Build.ID;
     static final Map<AbstractSensor, TextView> consumptionTv = new Hashtable<AbstractSensor, TextView>();
     static private SharedPreferences sp;
+    private int REQUEST_ENABLE_BT = 2000; //What you want here.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,17 @@ public class SensorActivity extends Activity{
 
         final LinearLayout l = (LinearLayout) findViewById(R.id.general_view);
 
-        AbstractSensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE));
+        final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
+            // Device does not support Bluetooth
+        }
+
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
+        AbstractSensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE), mBluetoothAdapter);
         for(AbstractSensor s: AbstractSensorLoggerTask.sensors)
             addAbstractSensor(s, l);
     }

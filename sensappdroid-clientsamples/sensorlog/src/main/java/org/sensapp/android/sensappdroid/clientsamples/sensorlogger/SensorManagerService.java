@@ -4,17 +4,18 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AbstractSensor;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AndroidSensor;
 import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog.AbstractSensorLoggerTask;
 import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog.AndroidSensorLoggerTask;
 import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog.SensorLoggerTask;
-import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AbstractSensor;
-import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AndroidSensor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class SensorManagerService extends Service {
     static private Timer timer = null;
     static private List<AbstractSensorLoggerTask> taskList= new ArrayList<AbstractSensorLoggerTask>();
     static private Intent myIntent;
+    private int REQUEST_ENABLE_BT = 2000; //What you want here.
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -43,7 +45,15 @@ public class SensorManagerService extends Service {
     @Override
     public void onCreate(){
         super.onCreate();
-        AbstractSensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE));
+        final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
+            // Device does not support Bluetooth
+        }
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivity(enableBtIntent);
+        }
+        AbstractSensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE), mBluetoothAdapter);
     }
 
     @Override
