@@ -5,13 +5,11 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.hardware.Sensor;
-import android.util.Log;
 import org.sensapp.android.sensappdroid.api.SensAppUnit;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.SensorActivity;
 import org.sintef.jarduino.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,9 +28,9 @@ public class BluetoothSensor extends AbstractSensor {
     private String sensorName;
     static final int DEFAULT_RATE = 5000;
     final BluetoothAdapter mBluetoothAdapter;
-    private BluetoothDevice mmDevice = null;
+    private String deviceName = null;
     private BluetoothSocket mmSocket;
-    private JArduino mArduino;
+    static JArduino mArduino = null;
     static int sensorValue = 2;
     private String mUUID = "00001101-0000-1000-8000-00805F9B34FB";
 
@@ -40,39 +38,9 @@ public class BluetoothSensor extends AbstractSensor {
         setEntryLevel();
         initData();
         this.sensorName = sensorName;
+        this.deviceName = deviceName;
         mBluetoothAdapter = bluetoothDevice;
         mComposite = composite;
-
-        List<String> mArray = new ArrayList<String>();
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-        // If there are paired devices
-        if (pairedDevices.size() > 0) {
-            // Loop through paired devices
-            for (BluetoothDevice device : pairedDevices) {
-                // Add the name and address to an array adapter to show in a ListView
-                if(device.getName().equals(deviceName))
-                    mmDevice = device;
-                mArray.add(device.getName() + "\n" + device.getAddress());
-            }
-        }
-
-        BluetoothSocket tmp = null;
-
-        UUID myUUID = UUID.fromString(mUUID);
-        try {
-            // MY_UUID is the app's UUID string, also used by the server code
-            tmp = mmDevice.createRfcommSocketToServiceRecord(myUUID);
-        } catch (IOException e) { }
-        mmSocket = tmp;
-
-        try {
-            mmSocket.connect();
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-
-        mArduino = new BlinkAndAnalog(mmSocket);
-        //mArduino.runArduinoProcess();
     }
 
     final public boolean isThreeDataSensor(){
@@ -87,7 +55,7 @@ public class BluetoothSensor extends AbstractSensor {
         data = new float[1];
     }
 
-    public void setData(Context context/*, float x*/){
+    public void setData(Context context){
         if(!isOneDataSensor())
             return;
         data[0]=sensorValue*entryLevel;
@@ -125,15 +93,66 @@ public class BluetoothSensor extends AbstractSensor {
         return SensAppUnit.MOL;
     }
 
+    void connectAndExecute(){
+        // The class is allocated 2 times, but we need only one connection and one device.
+        if(mArduino == null){
+            BluetoothDevice mmDevice = null;
+
+            //Retrieve the right paired bluetooth device.
+            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+            if (pairedDevices.size() > 0) {
+                for (BluetoothDevice device : pairedDevices) {
+                    if(device.getName().equals(deviceName))
+                        mmDevice = device;
+                }
+            }
+
+            //Creating the socket.
+            BluetoothSocket tmp = null;
+
+            if(mmDevice == null){
+                SensorActivity.ME.showError("Bluetooth issue!", "Make sure you have correctly set the bluetooth device name. Make also sure you have paired this device with your Android platform.");
+                this.setListened(false);
+                return;
+            }
+
+            if(mmSocket == null || !mmSocket.isConnected()){
+                UUID myUUID = UUID.fromString(mUUID);
+                try {
+                    tmp = mmDevice.createRfcommSocketToServiceRecord(myUUID);
+                } catch (IOException e) { }
+                mmSocket = tmp;
+
+                try {
+                    mmSocket.connect();
+                } catch (IOException e) {
+                    SensorActivity.ME.showError("Bluetooth issue!", "Connection attempt failed.");
+                    this.setListened(false);
+                }
+
+                // instantiate and execute the JArduino program
+                mArduino = new BlinkAndAnalog(mmSocket);
+                mArduino.runArduinoProcess();
+            }
+        }
+    }
+
     @Override
     public void setListened(boolean set){
         super.setListened(set);
         if(set){
-           mArduino.runArduinoProcess();
+            connectAndExecute();
         } else {
-           mArduino.stopArduinoProcess();
+            if(mArduino != null){
+                mArduino.stopArduinoProcess();
+                try {
+                    mmSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+                mArduino = null;
+            }
         }
-
     }
 
     public int getDefaultRate() {
@@ -141,6 +160,7 @@ public class BluetoothSensor extends AbstractSensor {
     }
 }
 
+// JArduino Program.
 class BlinkAndAnalog extends JArduino {
     final AnalogPin analogInPin = AnalogPin.A_0;
 
@@ -167,6 +187,5 @@ class BlinkAndAnalog extends JArduino {
         // get data from analog sensor on pin analogPin.
         int value = analogRead(analogInPin);
         BluetoothSensor.sensorValue = value;
-        Log.d("coucou", String.valueOf(value));
     }
 }
