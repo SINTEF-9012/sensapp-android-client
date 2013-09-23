@@ -8,7 +8,6 @@ import android.hardware.Sensor;
 import android.util.Log;
 import org.sensapp.android.sensappdroid.api.SensAppUnit;
 import org.sintef.jarduino.*;
-import org.sintef.jarduino.comm.AndroidBluetoothConfiguration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,7 +72,7 @@ public class BluetoothSensor extends AbstractSensor {
         }
 
         mArduino = new BlinkAndAnalog(mmSocket);
-        mArduino.runArduinoProcess();
+        //mArduino.runArduinoProcess();
     }
 
     final public boolean isThreeDataSensor(){
@@ -129,7 +128,7 @@ public class BluetoothSensor extends AbstractSensor {
     @Override
     public void setListened(boolean set){
         super.setListened(set);
-        if(set == true){
+        if(set){
            mArduino.runArduinoProcess();
         } else {
            mArduino.stopArduinoProcess();

@@ -2,6 +2,7 @@ package org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,10 +12,7 @@ import android.preference.PreferenceManager;
 import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.R;
 import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.SensorActivity;
 import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.SensorManagerService;
-import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AbstractSensor;
-import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AndroidSensor;
-import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.BatterySensor;
-import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.FreeMemorySensor;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +78,7 @@ public abstract class AbstractSensorLoggerTask extends TimerTask{
         ((AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent);
     }
 
-    static public void setUpSensors(Context c, SensorManager manager){
+    static public void setUpSensors(Context c, SensorManager manager, BluetoothAdapter bt){
         sensorManager = manager;
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
@@ -101,6 +99,9 @@ public abstract class AbstractSensorLoggerTask extends TimerTask{
         //Add the Free Memory percentage
         FreeMemorySensor fms = new FreeMemorySensor(compositeName);
         setUpSensor(fms, sp, c);
+
+        BluetoothSensor bts = new BluetoothSensor(compositeName, "BluetoothLight", bt, "FireFly-4101");
+        setUpSensor(bts, sp, c);
     }
 
     static private void setUpSensor(AbstractSensor as, SharedPreferences sp, Context c){
