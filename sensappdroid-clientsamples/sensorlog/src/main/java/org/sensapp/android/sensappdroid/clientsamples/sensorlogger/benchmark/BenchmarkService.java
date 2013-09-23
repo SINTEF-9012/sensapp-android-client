@@ -1,4 +1,4 @@
-package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
+package org.sensapp.android.sensappdroid.clientsamples.sensorlogger.benchmark;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -6,13 +6,14 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.SensorManager;
-import android.os.BatteryManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.R;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.SensorActivity;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AbstractSensor;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AndroidSensor;
 
 import java.util.ArrayList;
 import java.util.List;

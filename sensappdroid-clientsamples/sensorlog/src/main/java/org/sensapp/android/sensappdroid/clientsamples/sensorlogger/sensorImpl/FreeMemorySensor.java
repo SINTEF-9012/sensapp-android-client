@@ -1,4 +1,4 @@
-package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
+package org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -16,7 +16,7 @@ public class FreeMemorySensor extends AbstractSensor {
 
     static final int DEFAULT_RATE = 10000;
 
-    FreeMemorySensor(String composite) {
+    public FreeMemorySensor(String composite) {
         mSensor = null;
         setEntryLevel();
         initData();

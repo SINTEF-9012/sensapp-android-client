@@ -1,4 +1,4 @@
-package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
+package org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl;
 
 import android.content.Context;
 import android.hardware.Sensor;

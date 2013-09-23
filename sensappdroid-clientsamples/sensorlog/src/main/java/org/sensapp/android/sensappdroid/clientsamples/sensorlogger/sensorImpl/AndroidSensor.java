@@ -1,4 +1,4 @@
-package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
+package org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -21,7 +21,7 @@ public class AndroidSensor extends AbstractSensor{
     private int nbMeasures = 0;
     private double benchmarkAvg = 0;
 
-    AndroidSensor(Sensor s, String composite) {
+    public AndroidSensor(Sensor s, String composite) {
         mSensor = s;
         setEntryLevel();
         initData();
