@@ -1,7 +1,10 @@
 package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -18,6 +21,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.sensapp.android.sensappdroid.api.SensAppHelper;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.benchmark.BenchmarkTask;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AbstractSensor;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AndroidSensor;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog.AbstractSensorLoggerTask;
 
 import java.util.Hashtable;
 import java.util.Map;
@@ -27,16 +34,21 @@ import java.util.Map;
  */
 public class SensorActivity extends Activity{
 
-    static protected final String SERVICE_RUNNING = "pref_service_is_running";
+    static public final String SERVICE_RUNNING = "pref_service_is_running";
     static private boolean BENCH_MARKED;
     static final int GREY=0xFFCCDDFF;
-    static String compositeName = Build.MODEL + Build.ID;
+    static public String compositeName = Build.MODEL + Build.ID;
     static final Map<AbstractSensor, TextView> consumptionTv = new Hashtable<AbstractSensor, TextView>();
     static private SharedPreferences sp;
+    final private int REQUEST_ENABLE_BT = 2000; //What you want here.
+    public BluetoothAdapter mBluetoothAdapter;
+    static public SensorActivity ME;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ME = this;
 
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
@@ -58,9 +70,66 @@ public class SensorActivity extends Activity{
 
         final LinearLayout l = (LinearLayout) findViewById(R.id.general_view);
 
-        AbstractSensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE));
+        connectBluetooth();
+
+        AbstractSensorLoggerTask.setUpSensors(getApplicationContext(), (SensorManager) getSystemService(SENSOR_SERVICE), mBluetoothAdapter);
         for(AbstractSensor s: AbstractSensorLoggerTask.sensors)
             addAbstractSensor(s, l);
+    }
+
+    //We want to turn on the bluetooth only once.
+    private int connectionCpt = 0;
+    public void connectBluetooth(){
+        connectionCpt++;
+        /* Set up the connection between the android platform and the Arduino using Bluetooth */
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
+            showError("Bluetooth issue!", "This Android device does not support bluetooth.");
+            return;
+        }
+
+        if(connectionCpt == 1){
+            // Android asks the user to turn on bluetooth and send to "onActivityResult"
+            if (!mBluetoothAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            } else {
+                onActivityResult(REQUEST_ENABLE_BT, RESULT_OK, null);
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch(requestCode){
+            case REQUEST_ENABLE_BT:
+                //if Bluetooth has not been enabled.
+                if(resultCode == RESULT_CANCELED){
+                    showError("Bluetooth issue!", "Bluetooth has not been enabled.");
+                    return;
+                }
+
+                break;
+        }
+    }
+
+    public void showError(String title, String text){
+        final TextView et = new TextView(this);
+        et.setTextSize(16);
+        et.setPadding(10,10,10,10);
+        et.setText(text);
+        final AlertDialog ad = new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setView(et)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        return;
+                    }
+                })
+                .create();
+        ad.show();
     }
 
     private void addAbstractSensor(AbstractSensor as, LinearLayout l){

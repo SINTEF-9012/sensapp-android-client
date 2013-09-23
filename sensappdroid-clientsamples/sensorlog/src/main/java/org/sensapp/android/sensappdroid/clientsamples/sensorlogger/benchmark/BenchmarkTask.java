@@ -1,4 +1,4 @@
-package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
+package org.sensapp.android.sensappdroid.clientsamples.sensorlogger.benchmark;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -10,8 +10,11 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import org.sensapp.android.sensappdroid.api.SensAppHelper;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.R;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.SensorActivity;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AbstractSensor;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AndroidSensor;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
+package org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,6 +8,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.preference.PreferenceManager;
 import org.sensapp.android.sensappdroid.api.SensAppHelper;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.SensorActivity;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.AndroidSensor;
 
 /**
  * @author Jonathan Nain
@@ -16,7 +18,7 @@ import org.sensapp.android.sensappdroid.api.SensAppHelper;
  */
 public class AndroidSensorLoggerTask extends AbstractSensorLoggerTask implements SensorEventListener{
 
-    AndroidSensorLoggerTask(AndroidSensor as, Context c){
+    public AndroidSensorLoggerTask(AndroidSensor as, Context c){
         super(as, c);
     }
 

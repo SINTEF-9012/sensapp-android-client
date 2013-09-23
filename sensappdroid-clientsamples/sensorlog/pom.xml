@@ -90,6 +90,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.sintef.jarduino</groupId>
+            <artifactId>org.sintef.jarduino.core</artifactId>
+            <version>0.1.7-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sintef.jarduino</groupId>
+            <artifactId>org.sintef.jarduino.bluetooth</artifactId>
+            <version>0.1.7-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.sensapp.android</groupId>
             <artifactId>sensappdroid-contract</artifactId>
         </dependency>

@@ -1,13 +1,18 @@
-package org.sensapp.android.sensappdroid.clientsamples.sensorlogger;
+package org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.preference.PreferenceManager;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.R;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.SensorActivity;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.SensorManagerService;
+import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +26,7 @@ import java.util.TimerTask;
 public abstract class AbstractSensorLoggerTask extends TimerTask{
 
     static SensorManager sensorManager = null;
-    static List<AbstractSensor> sensors;
+    static public List<AbstractSensor> sensors;
     protected AbstractSensor sensor = null;
     static Context context;
 
@@ -73,7 +78,7 @@ public abstract class AbstractSensorLoggerTask extends TimerTask{
         ((AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent);
     }
 
-    static public void setUpSensors(Context c, SensorManager manager){
+    static public void setUpSensors(Context c, SensorManager manager, BluetoothAdapter bt){
         sensorManager = manager;
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
@@ -94,6 +99,10 @@ public abstract class AbstractSensorLoggerTask extends TimerTask{
         //Add the Free Memory percentage
         FreeMemorySensor fms = new FreeMemorySensor(compositeName);
         setUpSensor(fms, sp, c);
+
+        //Add the Bluetooth Light sensor
+        BluetoothSensor bts = new BluetoothSensor(compositeName, "BluetoothLight", bt, "FireFly-4101");
+        setUpSensor(bts, sp, c);
     }
 
     static private void setUpSensor(AbstractSensor as, SharedPreferences sp, Context c){
