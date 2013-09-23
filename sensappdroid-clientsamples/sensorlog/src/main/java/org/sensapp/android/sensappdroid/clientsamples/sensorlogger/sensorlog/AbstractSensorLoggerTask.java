@@ -100,6 +100,7 @@ public abstract class AbstractSensorLoggerTask extends TimerTask{
         FreeMemorySensor fms = new FreeMemorySensor(compositeName);
         setUpSensor(fms, sp, c);
 
+        //Add the Bluetooth Light sensor
         BluetoothSensor bts = new BluetoothSensor(compositeName, "BluetoothLight", bt, "FireFly-4101");
         setUpSensor(bts, sp, c);
     }
