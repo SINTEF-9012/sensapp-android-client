@@ -117,22 +117,11 @@
     </dependencies>
 
 
-	<build>
-		<finalName>${project.artifactId}</finalName>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-                    <artifactId>android-maven-plugin</artifactId>
-                    <version>${android.plugin.version}</version>
-                    <extensions>true</extensions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
-				<artifactId>android-maven-plugin</artifactId>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                <artifactId>android-maven-plugin</artifactId>
                 <configuration>
                     <androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
                     <assetsDirectory>${project.basedir}/assets</assetsDirectory>
@@ -155,8 +144,7 @@
 
                     <zipalign>
                         <verbose>true</verbose>
-                        <skip>false</skip>
-                        <inputApk>${project.build.directory}/${project.artifactId}.apk</inputApk>
+                        <inputApk>${project.build.directory}/${project.artifactId}-${project.version}.apk</inputApk>
                         <outputApk>${project.build.directory}/${project.artifactId}-aligned.apk</outputApk>
                     </zipalign>
 
@@ -174,7 +162,8 @@
                     </execution>
                 </executions>
                 <extensions>true</extensions>
-			</plugin>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jarsigner-plugin</artifactId>
@@ -204,6 +193,6 @@
                     <merge>true</merge>
                 </configuration>
             </plugin>
-		</plugins>
-	</build>
+        </plugins>
+    </build>
 </project>
