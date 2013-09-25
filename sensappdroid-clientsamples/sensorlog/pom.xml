@@ -125,7 +125,7 @@
                     <nativeLibrariesDirectory>${project.basedir}/src/main/native</nativeLibrariesDirectory>
                     <sdk>
                         <path>${android.sdk.path}</path>
-                        <platform>16</platform>
+                        <platform>7</platform>
                     </sdk>
                     <undeployBeforeDeploy>true</undeployBeforeDeploy>
 
