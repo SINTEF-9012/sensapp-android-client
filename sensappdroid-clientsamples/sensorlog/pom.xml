@@ -71,7 +71,7 @@
         <cobertura.skip>false</cobertura.skip>
         <javadocs.skip>false</javadocs.skip>
         <pmd.skip>false</pmd.skip>
-        <zipalign.skip>true</zipalign.skip>
+        <zipalign.skip>false</zipalign.skip>
 	</properties>
 
     <dependencyManagement>
