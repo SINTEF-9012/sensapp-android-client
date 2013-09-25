@@ -31,10 +31,6 @@
 		<platform.version>4.1.1.4</platform.version>
 
         <jackson.version>1.9.7</jackson.version>
-        <headerdir>${project.parent.basedir}</headerdir>
-        <findbugs-exclude.location>${project.parent.basedir}/reporting/findbugs-exclude.xml</findbugs-exclude.location>
-        <maven-checkstyle-plugin.configLocation>${project.parent.basedir}/reporting/checkstyle.xml</maven-checkstyle-plugin.configLocation>
-        <maven-pmd-plugin.configLocation>${project.parent.basedir}/reporting/pmd.xml</maven-pmd-plugin.configLocation>
 
 		<android.plugin.version>3.3.0</android.plugin.version>
         <plugin.maven-jarsigner.version>1.2</plugin.maven-jarsigner.version>
