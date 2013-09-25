@@ -65,7 +65,7 @@
         <maven-pmd-plugin.configLocation>reporting/pmd.xml</maven-pmd-plugin.configLocation>
         <findbugs-exclude.location>${project.basedir}/reporting/findbugs-exclude.xml</findbugs-exclude.location>
 
-        <proguard.skip>false</proguard.skip>
+        <proguard.skip>true</proguard.skip>
         <checkstyle.skip>false</checkstyle.skip>
         <findbugs.skip>false</findbugs.skip>
         <cobertura.skip>false</cobertura.skip>
