@@ -34,3 +34,7 @@ Screenshot
 ![SensorLog Start Screen](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshot/startscreen.png) ![Sensors Logging](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshot/startedsensors.png) ![Settings Screen](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshot/settingsscreen.png) ![Setting Edit](https://raw.github.com/SINTEF-9012/sensapp-android-client/master/extra/screenshot/settingedit.png).
 
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/SINTEF-9012/sensapp-android-client/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
