@@ -1,8 +1,24 @@
+/**
+ * Copyright (C) 2012 SINTEF <fabien@fleurey.com>
+ *
+ * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.gnu.org/licenses/lgpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorlog;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,6 +32,7 @@ import org.sensapp.android.sensappdroid.clientsamples.sensorlogger.sensorimpl.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.TimerTask;
 
 /**
@@ -102,15 +119,17 @@ public abstract class AbstractSensorLoggerTask extends TimerTask{
 
         //Add the Bluetooth Kestrel device
         Set<BluetoothDevice> pairedDevices = bt.getBondedDevices();
+        BluetoothSensor bts = null;
         for(BluetoothDevice dev : pairedDevices)
         {
-            if (dev.getName().statsWith("K4000"))
+            if (dev.getName().startsWith("K4000"))
             {
-                btconnector = new Connector(bt, dev.getName());
+                bts = new BluetoothSensor(compositeName, "K4000", bt, dev.getName());
+                //btconnector = new Connector(bt, dev.getName());
             }
         }
 
-        //BluetoothSensor bts = new BluetoothSensor(compositeName, "K400-699932", bt, "K4000");
+
         setUpSensor(bts, sp, c);
     }
 
