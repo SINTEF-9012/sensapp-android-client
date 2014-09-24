@@ -100,8 +100,17 @@ public abstract class AbstractSensorLoggerTask extends TimerTask{
         FreeMemorySensor fms = new FreeMemorySensor(compositeName);
         setUpSensor(fms, sp, c);
 
-        //Add the Bluetooth Light sensor
-        BluetoothSensor bts = new BluetoothSensor(compositeName, "K400-699932", bt, "K4000");
+        //Add the Bluetooth Kestrel device
+        Set<BluetoothDevice> pairedDevices = bt.getBondedDevices();
+        for(BluetoothDevice dev : pairedDevices)
+        {
+            if (dev.getName().statsWith("K4000"))
+            {
+                btconnector = new Connector(bt, dev.getName());
+            }
+        }
+
+        //BluetoothSensor bts = new BluetoothSensor(compositeName, "K400-699932", bt, "K4000");
         setUpSensor(bts, sp, c);
     }
 
