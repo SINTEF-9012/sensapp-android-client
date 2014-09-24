@@ -101,7 +101,7 @@ public abstract class AbstractSensorLoggerTask extends TimerTask{
         setUpSensor(fms, sp, c);
 
         //Add the Bluetooth Light sensor
-        BluetoothSensor bts = new BluetoothSensor(compositeName, "Kestrel", bt, "K4000");
+        BluetoothSensor bts = new BluetoothSensor(compositeName, "K400-699932", bt, "K4000");
         setUpSensor(bts, sp, c);
     }
 
